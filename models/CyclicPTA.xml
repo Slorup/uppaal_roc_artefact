@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+int x, c, T;
+const int Max=3;
+const int Min=4;
+chan tick;</declaration>
+	<template>
+		<name>Tick</name>
+		<location id="id0" x="0" y="0">
+			<urgent/>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-144" y="-34">T==Max+1</label>
+			<label kind="assignment" x="-102" y="-51">T=0, c=0</label>
+			<nail x="-68" y="0"/>
+			<nail x="-68" y="-68"/>
+			<nail x="0" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="18" y="-34">T&lt;=Max</label>
+			<label kind="synchronisation" x="18" y="-17">tick!</label>
+			<label kind="assignment" x="18" y="0">T++</label>
+			<nail x="68" y="0"/>
+			<nail x="68" y="68"/>
+			<nail x="0" y="68"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Proc</name>
+		<declaration>// Place local declarations here.</declaration>
+		<location id="id1" x="-68" y="0">
+		</location>
+		<location id="id2" x="136" y="0">
+		</location>
+		<init ref="id1"/>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id2"/>
+			<label kind="guard" x="221" y="-34">x&lt;2</label>
+			<label kind="synchronisation" x="221" y="-17">tick?</label>
+			<label kind="assignment" x="221" y="0">x++,
+c=c+1</label>
+			<nail x="204" y="-34"/>
+			<nail x="204" y="34"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-170" y="8">x&lt;3</label>
+			<label kind="synchronisation" x="-178" y="-8">tick?</label>
+			<label kind="assignment" x="-187" y="-51">x++,
+c=c+2</label>
+			<nail x="-136" y="34"/>
+			<nail x="-136" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<nail x="136" y="68"/>
+			<nail x="-68" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-50" y="-102">x&gt;=1</label>
+			<label kind="assignment" x="-50" y="-68">x=0</label>
+			<nail x="-68" y="-68"/>
+			<nail x="136" y="-68"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+system Proc, Tick;
+    </system>
+	<queries>
+		<query>
+			<formula>E[](T==Max imply c&lt;=Min)</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

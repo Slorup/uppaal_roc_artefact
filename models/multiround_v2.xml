@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.</declaration>
+	<template>
+		<name x="5" y="5">Template</name>
+		<declaration>// Place local declarations here.
+clock x;
+clock y;</declaration>
+		<location id="id0" x="-212" y="-102">
+			<name x="-221" y="-136">a</name>
+			<label kind="invariant" x="-306" y="-119">x &lt;= 1 &amp;&amp;
+cost'==4</label>
+		</location>
+		<location id="id1" x="-110" y="0">
+			<name x="-110" y="-34">d</name>
+			<label kind="invariant" x="-144" y="25">x &lt;= 10 &amp;&amp;
+cost'==1</label>
+		</location>
+		<location id="id2" x="-110" y="-102">
+			<name x="-110" y="-136">c</name>
+			<label kind="invariant" x="-153" y="-85">cost'==100</label>
+		</location>
+		<location id="id3" x="-8" y="-102">
+			<name x="-18" y="-136">b</name>
+			<label kind="invariant" x="17" y="-119">x &lt;= 2 &amp;&amp;
+cost'==2</label>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-212" y="-51">x := 0,
+y := 0</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-51" y="-51">y &gt;= 10</label>
+			<label kind="assignment" x="-51" y="-34">x := 0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-178" y="-119">x := 0</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-85" y="-119">x &gt;= 1</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="assignment" x="-127" y="-195">x:=0</label>
+			<nail x="-110" y="-178"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+Process = Template();
+// List one or more processes to be composed into a system.
+system Process;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

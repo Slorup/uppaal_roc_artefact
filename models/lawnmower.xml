@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+clock x, y;</declaration>
+	<template>
+		<name x="5" y="5">Lawnmower</name>
+		<declaration>// Place local declarations here.</declaration>
+		<location id="id0" x="-161" y="-25">
+			<name x="-187" y="-59">Short</name>
+			<label kind="invariant" x="-280" y="-51">x&lt;= 3 &amp;&amp;
+cost'==1 &amp;&amp;
+reward'==10</label>
+		</location>
+		<location id="id1" x="-17" y="-25">
+			<name x="-42" y="-59">Long</name>
+			<label kind="invariant" x="17" y="-59">x&lt;=5 &amp;&amp; 
+cost'==1 &amp;&amp;
+reward'==3</label>
+		</location>
+		<location id="id2" x="68" y="-119">
+			<name x="51" y="-153">Slow</name>
+			<label kind="invariant" x="102" y="-144">x&lt;=3 &amp;&amp;
+cost'==1 &amp;&amp;
+reward'==0</label>
+		</location>
+		<location id="id3" x="68" y="68">
+			<name x="51" y="85">Fast</name>
+			<label kind="invariant" x="102" y="51">x&lt;=3 &amp;&amp;
+cost'==1 &amp;&amp;
+reward'==0</label>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-8" y="76">x&gt;=2</label>
+			<label kind="assignment" x="-212" y="34">x:=0,y:=0</label>
+			<nail x="-93" y="68"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="guard" x="34" y="8">y&gt;=5</label>
+			<label kind="assignment" x="51" y="25">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-25" y="-144">x&gt;=3</label>
+			<label kind="assignment" x="-170" y="-93">x:=0</label>
+			<nail x="-93" y="-119"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="assignment" x="42" y="-85">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-119" y="-42">x&gt;=1</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+Process = Lawnmower();
+// List one or more processes to be composed into a system.
+system Process;
+    </system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

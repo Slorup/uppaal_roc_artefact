@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+const int N = 2; // # Machines
+typedef int[0, N-1] id_t;
+
+chan att[N];
+</declaration>
+	<template>
+		<name>Operator</name>
+		<parameter>int MinWait</parameter>
+		<declaration>clock z;
+</declaration>
+		<location id="id0" x="0" y="0">
+			<name x="-8" y="17">op</name>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="select" x="-24" y="-110">e : id_t</label>
+			<label kind="guard" x="-127" y="-34">z &gt;= MinWait</label>
+			<label kind="synchronisation" x="-24" y="-76">att[e]!</label>
+			<label kind="assignment" x="34" y="-42">z:=0</label>
+			<nail x="42" y="-59"/>
+			<nail x="-42" y="-59"/>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Machine</name>
+		<parameter>const int D, const int P, const int p, const int G, const int g, const int id</parameter>
+		<declaration>// Place local declarations here.
+clock x;</declaration>
+		<location id="id1" x="0" y="0">
+			<name x="-51" y="-17">HIGH</name>
+			<label kind="invariant" x="-136" y="8">cost' == P &amp;&amp; reward' == G &amp;&amp; x &lt;= D</label>
+		</location>
+		<location id="id2" x="0" y="161">
+			<name x="-17" y="178">LOW</name>
+			<label kind="invariant" x="-85" y="195">cost' == p &amp;&amp; reward' == g</label>
+		</location>
+		<init ref="id1"/>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="85" y="51">att[id]?</label>
+			<label kind="assignment" x="85" y="76">x:=0</label>
+			<nail x="76" y="161"/>
+			<nail x="76" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-153" y="59">x &lt;= D</label>
+			<nail x="-93" y="0"/>
+			<nail x="-93" y="161"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-34" y="-110">att[id]?</label>
+			<label kind="assignment" x="-25" y="-93">x:=0</label>
+			<nail x="-51" y="-68"/>
+			<nail x="-51" y="-68"/>
+			<nail x="34" y="-68"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+const int MinWait1 = 4;
+Op1 = Operator(MinWait1);
+
+const int MinWait2 = 2;
+//Op2 = Operator(MinWait2);
+
+
+const int D1 = 3;
+const int G1 = 4;
+const int g1 = 3;
+const int P1 = 3;
+const int p1 = 5;
+M1 = Machine(D1, P1, p1, G1, g1, 0);
+
+const int D2 = 6;
+const int G2 = 2;
+const int g2 = 2;
+const int P2 = 3;
+const int p2 = 5;
+M2 = Machine(D2, P2, p2, G2, g2, 1);
+
+const int D3 = 3;
+const int G3 = 4;
+const int g3 = 3;
+const int P3 = 3;
+const int p3 = 5;
+//M3 = Machine(D3, P3, p3, G3, g3, 2);
+
+
+// List one or more processes to be composed into a system.
+system Op1, M1, M2;</system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

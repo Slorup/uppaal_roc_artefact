@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+const int N = 2;      // # Parts
+typedef int[0,N-1] id_t;
+
+chan start[N], done[N];    </declaration>
+	<template>
+		<name x="5" y="5">Part</name>
+		<parameter>const id_t id</parameter>
+		<declaration>// Place local declarations here.
+clock x,y;</declaration>
+		<location id="id0" x="216" y="32">
+			<name x="206" y="2">d</name>
+			<label kind="invariant" x="206" y="47">cost' == 3</label>
+		</location>
+		<location id="id1" x="104" y="88">
+			<name x="94" y="58">c</name>
+			<label kind="invariant" x="72" y="112">cost' == 7</label>
+		</location>
+		<location id="id2" x="104" y="-32">
+			<name x="94" y="-62">b</name>
+			<label kind="invariant" x="24" y="-72">x &lt;= 10 &amp;&amp; cost' == 2</label>
+		</location>
+		<location id="id3" x="-16" y="32">
+			<name x="-26" y="2">a</name>
+			<label kind="invariant" x="-153" y="42">y &lt;= 12 &amp;&amp; cost' == 4</label>
+		</location>
+		<init ref="id3"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id3"/>
+			<label kind="guard" x="68" y="-204">y&gt;=4</label>
+			<label kind="synchronisation" x="221" y="-93">done[id]!</label>
+			<label kind="assignment" x="32" y="-184">y:=0,cost+=3</label>
+			<nail x="212" y="-212"/>
+			<nail x="-17" y="-212"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id1"/>
+			<label kind="guard" x="0" y="68">y&lt;=8</label>
+			<label kind="synchronisation" x="17" y="42">start[id]?</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="72" y="16">x &gt;= 10</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="guard" x="161" y="85">y&gt;=4</label>
+			<label kind="assignment" x="152" y="72">x:=0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="guard" x="136" y="-8">x&gt;=4</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="guard" x="8" y="-25">x&lt;=4</label>
+			<label kind="synchronisation" x="-8" y="-8">start[id]?</label>
+		</transition>
+	</template>
+	<template>
+		<name>Controller</name>
+		<declaration>clock z;</declaration>
+		<location id="id4" x="0" y="0">
+			<name x="-34" y="-59">waiting</name>
+			<label kind="invariant" x="-68" y="-34">cost'==1 and z &lt;= 10</label>
+		</location>
+		<location id="id5" x="0" y="136">
+			<name x="-17" y="187">busy</name>
+			<label kind="invariant" x="-34" y="161">cost'==2 and z &lt;= 17</label>
+		</location>
+		<init ref="id4"/>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="select" x="-136" y="51">e : id_t</label>
+			<label kind="synchronisation" x="-127" y="76">done[e]?</label>
+			<label kind="assignment" x="-102" y="102">z := 0</label>
+			<nail x="-76" y="59"/>
+			<nail x="-76" y="59"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="select" x="59" y="17">e : id_t</label>
+			<label kind="synchronisation" x="68" y="34">start[e]!</label>
+			<label kind="assignment" x="93" y="76">z := 0</label>
+			<nail x="76" y="59"/>
+			<nail x="76" y="59"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+// List one or more processes to be composed into a system.
+system Controller, Part;</system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
