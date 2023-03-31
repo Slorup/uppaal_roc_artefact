@@ -6,11 +6,6 @@ FILTER="${3}"
 UPPAAL_FOLDER="${4}"
 count=1
 
-echo $ALG
-echo $MAX_INSTANCES_TO_RUN
-echo $FILTER
-echo $UPPAAL_FOLDER
-
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ARTEFACT_DIR="$(dirname "$SCRIPT_DIR")"
 
@@ -23,6 +18,9 @@ declare -A algToGitBranchName
 algToGitBranchName["concretemcr"]="roc"
 algToGitBranchName["concretemcr_por"]="por"
 algToGitBranchName["lambdadeduction"]="lambdadeduction"
+
+cd $ARTEFACT_DIR
+mkdir -p results/$ALG
 
 echo Switching to git branch: ${algToGitBranchName["${ALG}"]}
 cd $UPPAAL_FOLDER
