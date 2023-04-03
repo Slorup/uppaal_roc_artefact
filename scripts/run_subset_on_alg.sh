@@ -19,15 +19,16 @@ algToGitBranchName["concretemcr"]="roc"
 algToGitBranchName["concretemcr_por"]="por"
 algToGitBranchName["lambdadeduction"]="lambdadeduction"
 
-cd $ARTEFACT_DIR
+cd $ARTEFACT_DIR || exit
 mkdir -p results/$ALG
 
 echo Switching to git branch: ${algToGitBranchName["${ALG}"]}
-cd $UPPAAL_FOLDER
+cd $UPPAAL_FOLDER || exit
 git checkout ${algToGitBranchName["${ALG}"]}
 bash ./server/scripts/cmakew.bash
 
-for INSTANCE in $(ls -d $ARTEFACT_DIR/models/*${FILTER}*) ; do
+for INSTANCE in $ARTEFACT_DIR/models/*${FILTER}*.xml* ; do
+  [[ -e "$INSTANCE" ]] || break
   if [ $count -le $MAX_INSTANCES_TO_RUN ]
   then
     filename=$(basename ${INSTANCE})
