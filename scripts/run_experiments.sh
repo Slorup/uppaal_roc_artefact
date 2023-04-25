@@ -1,6 +1,9 @@
 #!/bin/bash
-
-#TODO: RatioType and MaxInstances
+#SBATCH --time=1:00:00
+#SBATCH --mail-user=nsjo18@student.aau.dk
+#SBATCH --mail-type=FAIL
+#SBATCH --partition=naples
+#SBATCH --mem=1G
 
 declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por")
 
