@@ -21,6 +21,7 @@ alg_to_plot_options_dict: {str: str} = {
 def parse_result_data(result_folder):
     result_dict: dict[str, list[InstanceResult]] = {}
     alg_progress = 1
+
     ns_to_s_divider = 1000000000
     for alg_name in os.listdir(result_folder):
         print(f"Parsing results for algorithm {alg_name} - {alg_progress}/{len(os.listdir(result_folder))}")
@@ -87,7 +88,7 @@ def latex_ratio_step_plot(data, instance_name):
 
     output_latex_content(f"{instance_name}_plot_data.txt", latex_plot_legend + latex_plot_data)
 
-def latex_constant_scaling_plot(data):
+def latex_constant_scaling_plot(data, output_name):
     latex_plot_legend = r"\legend{"
     for alg in data.keys():
         latex_plot_legend += f"{alg}, "
@@ -97,10 +98,11 @@ def latex_constant_scaling_plot(data):
     for (alg, instace_results) in data.items():
         latex_plot_data += r"\addplot" + f"[{alg_to_plot_options_dict[alg]}] coordinates" + "{\n"
         scaling_instances = [instance_result for instance_result in instace_results if instance_result.scaling_factor != -1] #TODO: use other 'non-exist' value
+        scaling_instances = sorted(scaling_instances, key=lambda x: x.scaling_factor)
         for scaling_instance in scaling_instances:
             latex_plot_data += f"({scaling_instance.scaling_factor}, {scaling_instance.time_to_finish})\n"
         latex_plot_data += r"};" + "\n"
-    output_latex_content(f"constant_scaling_plot_data.txt", latex_plot_legend + latex_plot_data)
+    output_latex_content(f"{output_name}.txt", latex_plot_legend + latex_plot_data)
 
 def output_latex_content(file_name, content):
     print(f"Writing to file: 'latex/{file_name}'")
@@ -137,17 +139,26 @@ def prune_instances_not_on_all_algs(result_data: dict[str, list[InstanceResult]]
         remaining_instances = [instance for instance in instances if instance.instance_name in common_instances_names]
         result_data[alg] = remaining_instances
 
-    sort_results_data(result_data)
+def prune_instances_containing_str(result_data: dict[str, list[InstanceResult]], str: str):
+    for alg, instances in result_data.items():
+        remaining_instances = [instance for instance in instances if str not in instance.instance_name]
+        result_data[alg] = remaining_instances
 
+def filter_instances_to_contain_str(result_data: dict[str, list[InstanceResult]], str: str):
+    for alg, instances in result_data.items():
+        remaining_instances = [instance for instance in instances if str in instance.instance_name]
+        result_data[alg] = remaining_instances
 
 os.chdir("../results")
 result_data = parse_result_data(os.getcwd())
-prune_instances_not_on_all_algs(result_data)
+#prune_instances_not_on_all_algs(result_data)
+#prune_instances_containing_str(result_data, "plus1")
+filter_instances_to_contain_str(result_data, "plus1")
 
 os.chdir("../")
 latex_dir = os.path.join(os.getcwd(), f"latex")
 if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
 
-latex_constant_scaling_plot(result_data)
+latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
 #latex_ratio_step_plots_all_instances(result_data)

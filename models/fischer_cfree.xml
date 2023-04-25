@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+const int N = 4;
+typedef scalar[N] pid_t;
+
+chan free;
+chan take;
+chan release;</declaration>
+	<template>
+		<name x="5" y="5">Process</name>
+		<parameter>const pid_t pid</parameter>
+		<declaration>// Place local declarations here.
+clock x;
+const int k = 2;</declaration>
+		<location id="id0" x="-153" y="-110">
+			<name x="-178" y="-144">inactive</name>
+		</location>
+		<location id="id1" x="17" y="-110">
+			<name x="7" y="-144">req</name>
+			<label kind="invariant" x="42" y="-136">x &lt;= k</label>
+		</location>
+		<location id="id2" x="17" y="42">
+			<name x="-8" y="59">wait_taken</name>
+		</location>
+		<location id="id3" x="-153" y="42">
+			<name x="-161" y="59">cs</name>
+		</location>
+		<location id="id4" x="127" y="-34">
+			<name x="144" y="-42">wait_nottaken</name>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="119" y="-102">free!</label>
+			<label kind="assignment" x="119" y="-85">x:=0</label>
+			<nail x="92" y="-110"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="102" y="8">take?</label>
+			<nail x="76" y="42"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="17" y="-59">free!</label>
+			<label kind="assignment" x="17" y="-34">x:=0</label>
+			<nail x="59" y="0"/>
+			<nail x="59" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-204" y="-42">take?</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-110" y="51">x &gt;= k + 1</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-76" y="-59">x &lt;= k</label>
+			<label kind="synchronisation" x="-59" y="-42">take!</label>
+			<label kind="assignment" x="-67" y="-25">x := 0</label>
+			<nail x="-17" y="-68"/>
+			<nail x="-17" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-93" y="-127">free!</label>
+			<label kind="assignment" x="-93" y="-110">x:=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>Free</name>
+		<location id="id5" x="-93" y="-17">
+			<name x="-127" y="-93">nottaken</name>
+		</location>
+		<location id="id6" x="76" y="-17">
+			<name x="59" y="-93">taken</name>
+		</location>
+		<init ref="id6"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="127" y="-25">free?</label>
+			<nail x="119" y="-51"/>
+			<nail x="119" y="8"/>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-34" y="25">take?</label>
+			<nail x="42" y="25"/>
+			<nail x="-59" y="25"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-25" y="-76">take!</label>
+			<nail x="-59" y="-59"/>
+			<nail x="42" y="-59"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+system Process, Free;</system>
+	<queries>
+		<query>
+			<formula>A[] forall (i:pid_t) forall (j:pid_t) Process(i).cs &amp;&amp; Process(j).cs imply i == j</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] not deadlock</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>A[] forall (i:pid_t) Process(i).req implies (A&lt;&gt; Process(i).cs)</formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
