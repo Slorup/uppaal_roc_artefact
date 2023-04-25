@@ -31,8 +31,6 @@ do
   git checkout ${algToGitCommit["${ALG}"]}
   bash ./server/scripts/cmakew.bash
 
-  mkdir -p "$EXECUTABLE_DIR/${algToGitBranchName["${ALG}"]}"
-
-  cp -r -v "./server/build/linux64-release/build" "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/build"
+  cp -r -v "./server/build/linux64-release/build/bin" "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}"
 done
 

@@ -7,7 +7,7 @@ declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por")
 if (( $# < 5 ))
 then
   echo Incorrect usage. Arguments are: FILTER EXECUTABLE_DIR TIMEOUT_IN_SECONDS MAX_INSTANCES_TO_RUN ALGORITHMS_TO_RUN
-  echo Example: './run_experiments.sh "strandvejen" /home/slorup/Documents/git/uppaal_roc_artefact/executables 600 100 lambdadeduction'
+  echo Example: './run_experiments.sh "strandvejen" /home/slorup/Documents/git/uppaal_roc_artefact/executables 600 100 lambdadeduction concretemcr'
   echo Example: './run_experiments.sh "strandvejen" /home/slorup/Documents/git/uppaal_roc_artefact/executables 600 100 all'
   echo Algorithms: "${ALGS_TO_RUN[*]}"
 fi

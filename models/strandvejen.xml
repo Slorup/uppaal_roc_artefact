@@ -187,11 +187,11 @@ Fridge1 = Refrigerator(0, 7);
 Fridge2 = Refrigerator(0, 3);
 Consumer1 = Consumer(2, 6);
 Consumer2 = Consumer(2, 5);
-Consumer3 = Consumer(6, 13);
+//Consumer3 = Consumer(6, 13);
 Volunteer1 = Volunteer(1, 6);
 
 
-system Fridge1, Fridge2, Consumer1, Consumer2, Consumer3, Volunteer1;</system>
+system Fridge1, Fridge2, Consumer1, Consumer2, Volunteer1;</system>
 	<queries>
 		<query>
 			<formula></formula>
