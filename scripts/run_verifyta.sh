@@ -9,4 +9,5 @@ done
 HERE=$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)
 export LD_LIBRARY_PATH="$HERE"
 B=verifyta
-exec -a $B "$HERE"/libc.so.6 "$HERE"/$B "$@"
+exec "$HERE"/$B "$@"
+#exec -a $B "$HERE"/libc.so.6 "$HERE"/libgcc_s.so.1 "$HERE"/$B "$@"

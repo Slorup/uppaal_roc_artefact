@@ -31,6 +31,20 @@ do
   git checkout ${algToGitCommit["${ALG}"]}
   bash ./server/scripts/cmakew.bash
 
-  cp -r -v "./server/build/linux64-release/build/bin" "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}"
+  EXE_DIR="${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}"
+
+  mkdir -p "$EXE_DIR"
+
+  cp -v "./server/build/linux64-release/build/bin/verifyta" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/libcrypto.so.1.1" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/libglpk.so.40" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/libprlearn.so" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/libssl.so.1.1" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/libstrategy.so" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/lib/libc.so.6" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/lib/libgcc_s.so.1" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/lib/libm.so.6" "$EXE_DIR"
+  cp -v "./server/build/linux64-release/build/bin/lib/libstdc++.so.6" "$EXE_DIR"
+  cp -v "${SCRIPT_DIR}/run_verifyta.sh" "${EXE_DIR}"
 done
 
