@@ -35,6 +35,8 @@ do
 
   mkdir -p "$EXE_DIR"
 
+  #cp -r -v "./server/build/linux64-release/build/bin" "$EXE_DIR"
+
   cp -v "./server/build/linux64-release/build/bin/verifyta" "$EXE_DIR"
   cp -v "./server/build/linux64-release/build/bin/libcrypto.so.1.1" "$EXE_DIR"
   cp -v "./server/build/linux64-release/build/bin/libglpk.so.40" "$EXE_DIR"
@@ -45,6 +47,9 @@ do
   cp -v "./server/build/linux64-release/build/bin/lib/libgcc_s.so.1" "$EXE_DIR"
   cp -v "./server/build/linux64-release/build/bin/lib/libm.so.6" "$EXE_DIR"
   cp -v "./server/build/linux64-release/build/bin/lib/libstdc++.so.6" "$EXE_DIR"
-  cp -v "${SCRIPT_DIR}/run_verifyta.sh" "${EXE_DIR}"
+  mv "$EXE_DIR"/verifyta "$EXE_DIR"/verifyta.bin
+
+  cp -v "${SCRIPT_DIR}/verifyta" "${EXE_DIR}"
+  cp -v "${SCRIPT_DIR}/ld-linux-x86-64.so.2" "${EXE_DIR}"
 done
 
