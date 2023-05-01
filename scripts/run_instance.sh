@@ -2,6 +2,7 @@
 #SBATCH --time=1:00:00
 #SBATCH --mail-user=nsjo18@student.aau.dk
 #SBATCH --mail-type=FAIL
+#SBATCH --error=/nfs/home/student.aau.dk/nsjo18/slurm-output/run-tool-%j.err
 #SBATCH --partition=naples
 #SBATCH --mem=8G
 #SBATCH --cpus-per-task=1
@@ -13,18 +14,19 @@ ALG="${1}"
 TIME_LIMIT="${2}"
 INSTANCE="${3}"
 EXECUTABLE_DIR="${4}"
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-ARTEFACT_DIR="$(dirname "$SCRIPT_DIR")"
+ARTEFACT_DIR="${5}"
 
 declare -A algToNum
 algToNum["concretemcr"]=0
 algToNum["concretemcr_por"]=0
 algToNum["lambdadeduction"]=5
+algToNum["bdd"]=5
 
 declare -A algToGitBranchName
 algToGitBranchName["concretemcr"]="roc"
 algToGitBranchName["concretemcr_por"]="por"
 algToGitBranchName["lambdadeduction"]="lambdadeduction"
+algToGitBranchName["bdd"]="bdd"
 
 cd $ARTEFACT_DIR || exit
 mkdir -p results/$ALG

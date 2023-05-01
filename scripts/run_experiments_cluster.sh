@@ -6,7 +6,7 @@
 #SBATCH --mem=8G
 #SBATCH --cpus-per-task=1
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
 
 if (( $# < 5 ))
 then
@@ -38,7 +38,7 @@ for ALG in "${ALGS_TO_RUN[@]}" ; do
     [[ -e "$INSTANCE" ]] || break
     if [ $count -le $MAX_INSTANCES ]
     then
-      sbatch ./run_instance.sh "$ALG" $TIMEOUT_SECONDS "$INSTANCE" "$EXECUTABLE_FOLDER"
+      ./run_instance.sh "$ALG" $TIMEOUT_SECONDS "$INSTANCE" "$EXECUTABLE_FOLDER" "$ARTEFACT_DIR"
     fi
     (( count++ ))
   done

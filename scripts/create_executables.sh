@@ -11,12 +11,14 @@ declare -A algToGitBranchName
 algToGitBranchName["concretemcr"]="roc"
 algToGitBranchName["concretemcr_por"]="por"
 algToGitBranchName["lambdadeduction"]="lambdadeduction"
+algToGitBranchName["bdd"]="bdd"
 declare -A algToGitCommit
-algToGitCommit["concretemcr"]="3356821"
-algToGitCommit["concretemcr_por"]="b68ac8c"
-algToGitCommit["lambdadeduction"]="f50a061"
+algToGitCommit["concretemcr"]="c59f3eb"
+algToGitCommit["concretemcr_por"]="6859b6e"
+algToGitCommit["lambdadeduction"]="a9d1078"
+algToGitCommit["bdd"]="529b66a"
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
 
 if [ "$2" != "all" ]
 then

@@ -16,11 +16,13 @@ declare -A algToNum
 algToNum["concretemcr"]=0
 algToNum["concretemcr_por"]=0
 algToNum["lambdadeduction"]=5
+algToNum["bdd"]=5
 
 declare -A algToGitBranchName
 algToGitBranchName["concretemcr"]="roc"
 algToGitBranchName["concretemcr_por"]="por"
 algToGitBranchName["lambdadeduction"]="lambdadeduction"
+algToGitBranchName["bdd"]="bdd"
 
 cd $ARTEFACT_DIR || exit
 mkdir -p results/$ALG

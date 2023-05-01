@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
 
 if (( $# < 5 ))
 then

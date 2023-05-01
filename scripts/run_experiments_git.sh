@@ -8,7 +8,7 @@ MAX_INSTANCES=300
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
 
 if [ "$3" != "all" ]
 then
