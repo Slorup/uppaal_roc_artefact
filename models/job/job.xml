@@ -36,34 +36,34 @@ chan start[M];</declaration>
 		<transition>
 			<source ref="id4"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-569" y="-399">y &lt;= deadline</label>
-			<label kind="assignment" x="-603" y="-382">x = 0, reward += jobreward, y = 0</label>
+			<label kind="guard" x="-603" y="-399">y &lt;= deadline</label>
+			<label kind="assignment" x="-654" y="-382">x = 0, reward += jobreward, y = 0</label>
 			<nail x="-493" y="-357"/>
 		</transition>
 		<transition>
 			<source ref="id3"/>
 			<target ref="id4"/>
-			<label kind="guard" x="-595" y="-136">x == time2</label>
-			<label kind="synchronisation" x="-595" y="-119">done[m2]!</label>
-			<label kind="assignment" x="-595" y="-102">x = 0</label>
+			<label kind="guard" x="-586" y="-144">x == time2</label>
+			<label kind="synchronisation" x="-586" y="-127">done[m2]!</label>
+			<label kind="assignment" x="-569" y="-110">x = 0</label>
 		</transition>
 		<transition>
 			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="synchronisation" x="-688" y="-136">start[m2]!</label>
-			<label kind="assignment" x="-680" y="-119">x = 0</label>
+			<label kind="synchronisation" x="-688" y="-144">start[m2]!</label>
+			<label kind="assignment" x="-680" y="-127">x = 0</label>
 		</transition>
 		<transition>
 			<source ref="id1"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-816" y="-221">x == time1</label>
-			<label kind="synchronisation" x="-807" y="-204">done[m1]!</label>
-			<label kind="assignment" x="-807" y="-187">x = 0</label>
+			<label kind="guard" x="-790" y="-221">x == time1</label>
+			<label kind="synchronisation" x="-790" y="-204">done[m1]!</label>
+			<label kind="assignment" x="-765" y="-187">x = 0</label>
 		</transition>
 		<transition>
 			<source ref="id0"/>
 			<target ref="id1"/>
-			<label kind="synchronisation" x="-773" y="-331">start[m1]!</label>
+			<label kind="synchronisation" x="-782" y="-331">start[m1]!</label>
 			<label kind="assignment" x="-756" y="-314">x = 0</label>
 		</transition>
 	</template>
@@ -73,25 +73,25 @@ chan start[M];</declaration>
 		<declaration>// Place local declarations here.
 </declaration>
 		<location id="id5" x="-416" y="-263">
-			<name x="-426" y="-297">Idle</name>
-			<label kind="invariant" x="-399" y="-289">cost' == 2</label>
+			<name x="-425" y="-314">Idle</name>
+			<label kind="invariant" x="-450" y="-297">cost' == 2</label>
 		</location>
 		<location id="id6" x="-416" y="-76">
 			<name x="-442" y="-59">InUse</name>
-			<label kind="invariant" x="-467" y="-34">cost' == 6</label>
+			<label kind="invariant" x="-459" y="-42">cost' == 6</label>
 		</location>
 		<init ref="id5"/>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id5"/>
-			<label kind="synchronisation" x="-544" y="-161">done[id]?</label>
+			<label kind="synchronisation" x="-510" y="-110">done[id]?</label>
 			<nail x="-476" y="-170"/>
 			<nail x="-476" y="-170"/>
 		</transition>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id6"/>
-			<label kind="synchronisation" x="-365" y="-136">start[id]?</label>
+			<label kind="synchronisation" x="-382" y="-221">start[id]?</label>
 			<nail x="-365" y="-170"/>
 		</transition>
 	</template>

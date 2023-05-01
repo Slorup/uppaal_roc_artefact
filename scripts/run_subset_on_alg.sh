@@ -1,11 +1,6 @@
 #!/bin/bash
-#SBATCH --time=1:00:00
-#SBATCH --mail-user=nsjo18@student.aau.dk
-#SBATCH --mail-type=FAIL
-#SBATCH --partition=naples
-#SBATCH --mem=1G
 
-let "m=1024*1024*1"
+let "m=1024*1024*8"
 ulimit -v $m
 
 ALG="${1}"
@@ -37,7 +32,7 @@ for INSTANCE in $ARTEFACT_DIR/models/*${FILTER}*.xml* ; do
     filename=$(basename ${INSTANCE})
     filename="${filename%.*}"
     echo Running $filename on $ALG ..
-    timeout $TIME_LIMIT "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/verifyta" $INSTANCE --roc-alg=${algToNum["${ALG}"]} --ratio-type=1 >> $ARTEFACT_DIR/results/$ALG/$filename.txt
+    timeout $TIME_LIMIT "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/verifyta" $INSTANCE --roc-alg=${algToNum["${ALG}"]} --ratio-type=1 >> $ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt
     exit_status=$?
     if [[ $exit_status -eq 124 ]]; then
     	echo "Timed Out" >> $ARTEFACT_DIR/results/$ALG/$filename.txt

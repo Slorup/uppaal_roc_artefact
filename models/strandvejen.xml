@@ -3,7 +3,7 @@
 <nta>
 	<declaration>// Place global declarations here.
 
-const int N = 1; // Number of fridges
+const int N = 2; // Number of fridges
 
 typedef int[0,N-1] fridge_id_t;
 
@@ -15,18 +15,23 @@ chan refill[N];</declaration>
 		<declaration>// Place local declarations here.</declaration>
 		<location id="id0" x="238" y="-17">
 			<name x="212" y="-59">count0</name>
+			<label kind="invariant" x="195" y="-76">cost' == 1</label>
 		</location>
 		<location id="id1" x="110" y="-17">
 			<name x="85" y="-59">count1</name>
+			<label kind="invariant" x="68" y="-76">cost' == 1</label>
 		</location>
 		<location id="id2" x="-17" y="-17">
 			<name x="-42" y="-59">count2</name>
+			<label kind="invariant" x="-59" y="-76">cost' == 1</label>
 		</location>
 		<location id="id3" x="-144" y="-17">
 			<name x="-170" y="-59">count3</name>
+			<label kind="invariant" x="-187" y="-76">cost' == 1</label>
 		</location>
 		<location id="id4" x="-272" y="-17">
 			<name x="-297" y="-59">count4</name>
+			<label kind="invariant" x="-314" y="-76">cost' == 1</label>
 		</location>
 		<init ref="id4"/>
 		<transition>
@@ -88,11 +93,13 @@ chan refill[N];</declaration>
 		<declaration>clock x;</declaration>
 		<location id="id5" x="8" y="0">
 			<name x="-76" y="-17">Active</name>
-			<label kind="invariant" x="-127" y="0">x &lt;= max_time</label>
+			<label kind="invariant" x="-136" y="0">x &lt;= max_time 
+&amp;&amp; reward' == 2</label>
 		</location>
 		<location id="id6" x="8" y="110">
 			<name x="-76" y="102">Inactive</name>
-			<label kind="invariant" x="34" y="102">x &lt;= max_time</label>
+			<label kind="invariant" x="34" y="102">x &lt;= max_time 
+&amp;&amp; reward' == 1</label>
 		</location>
 		<init ref="id5"/>
 		<transition>
@@ -120,7 +127,7 @@ chan refill[N];</declaration>
 	</template>
 	<template>
 		<name>Volunteer</name>
-		<parameter>const int work_reward, const int transit_time</parameter>
+		<parameter>const int work_reward, const int transit_time, const int min_time</parameter>
 		<declaration>clock x;</declaration>
 		<location id="id7" x="-144" y="0">
 			<name x="-195" y="-110">GroupRoom</name>
@@ -143,6 +150,7 @@ cost' == 1</label>
 			<source ref="id7"/>
 			<target ref="id7"/>
 			<label kind="select" x="-195" y="-85">r: fridge_id_t</label>
+			<label kind="guard" x="-195" y="-127">x &gt;= min_time</label>
 			<label kind="synchronisation" x="-187" y="-68">withdraw[r]!</label>
 			<label kind="assignment" x="-170" y="-51">x := 0</label>
 			<nail x="-178" y="-51"/>
@@ -178,20 +186,21 @@ cost' == 1</label>
 			<target ref="id8"/>
 			<label kind="select" x="170" y="-25">r: fridge_id_t</label>
 			<label kind="synchronisation" x="170" y="-8">refill[r]!</label>
+			<label kind="assignment" x="170" y="8">cost += 2</label>
 			<nail x="162" y="-25"/>
 			<nail x="162" y="25"/>
 		</transition>
 	</template>
 	<system>
-Fridge1 = Refrigerator(0, 7);
-Fridge2 = Refrigerator(0, 3);
-Consumer1 = Consumer(2, 6);
-Consumer2 = Consumer(2, 5);
-//Consumer3 = Consumer(6, 13);
-Volunteer1 = Volunteer(1, 6);
+Fridge1 = Refrigerator(0, 15);
+Fridge2 = Refrigerator(1, 12);
+Consumer1 = Consumer(3, 6);
+Consumer2 = Consumer(3, 5);
+Consumer3 = Consumer(6, 13);
+Volunteer1 = Volunteer(1, 6, 4);
 
 
-system Fridge1, Fridge2, Consumer1, Consumer2, Volunteer1;</system>
+system Fridge1, Fridge2, Consumer1, Consumer3, Volunteer1;</system>
 	<queries>
 		<query>
 			<formula></formula>
