@@ -8,13 +8,13 @@ EXECUTABLE_DIR="${ARTEFACT_DIR}/executables"
 mkdir -p $EXECUTABLE_DIR
 
 declare -A algToGitBranchName
-algToGitBranchName["concretemcr"]="roc"
-algToGitBranchName["concretemcr_por"]="por"
+algToGitBranchName["concretemcr"]="mcr"
+algToGitBranchName["concretemcr_por"]="mcr_por"
 algToGitBranchName["lambdadeduction"]="lambdadeduction"
 algToGitBranchName["bdd"]="bdd"
 declare -A algToGitCommit
-algToGitCommit["concretemcr"]="c59f3eb"
-algToGitCommit["concretemcr_por"]="6859b6e"
+algToGitCommit["concretemcr"]="410de2d"
+algToGitCommit["concretemcr_por"]="c408eb8"
 algToGitCommit["lambdadeduction"]="a9d1078"
 algToGitCommit["bdd"]="529b66a"
 
@@ -49,6 +49,9 @@ do
   cp -v "./server/build/linux64-release/build/bin/lib/libgcc_s.so.1" "$EXE_DIR"
   cp -v "./server/build/linux64-release/build/bin/lib/libm.so.6" "$EXE_DIR"
   cp -v "./server/build/linux64-release/build/bin/lib/libstdc++.so.6" "$EXE_DIR"
+
+  [ -f "./server/build/linux64-release/build/bin/libcudd-3.0.0.so.0" ] && cp -v "./server/build/linux64-release/build/bin/libcudd-3.0.0.so.0" "$EXE_DIR"
+
   mv "$EXE_DIR"/verifyta "$EXE_DIR"/verifyta.bin
 
   cp -v "${SCRIPT_DIR}/verifyta" "${EXE_DIR}"

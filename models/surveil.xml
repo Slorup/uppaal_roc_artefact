@@ -106,8 +106,7 @@ y &lt;= 10</label>
 	</template>
 	<system>// Place template instantiations here.
 // List one or more processes to be composed into a system.
-system Place, Agent;
-    </system>
+system Place, Agent;</system>
 	<queries>
 		<query>
 			<formula></formula>

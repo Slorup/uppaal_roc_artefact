@@ -3,7 +3,7 @@
 #SBATCH --mail-user=nsjo18@student.aau.dk
 #SBATCH --mail-type=FAIL
 #SBATCH --partition=naples
-#SBATCH --mem=8G
+#SBATCH --mem=6G
 #SBATCH --cpus-per-task=1
 
 declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
