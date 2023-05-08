@@ -37,7 +37,7 @@ chan start[M];</declaration>
 			<source ref="id4"/>
 			<target ref="id0"/>
 			<label kind="guard" x="-569" y="-399">y &lt;= deadline * scaling + 1</label>
-			<label kind="assignment" x="-637" y="-382">x = 0, reward += jobreward * scaling, y = 0</label>
+			<label kind="assignment" x="-637" y="-382">x = 0, reward += jobreward * scaling + 1, y = 0</label>
 			<nail x="-493" y="-357"/>
 		</transition>
 		<transition>
@@ -74,11 +74,11 @@ chan start[M];</declaration>
 </declaration>
 		<location id="id5" x="-416" y="-263">
 			<name x="-426" y="-297">Idle</name>
-			<label kind="invariant" x="-399" y="-289">cost' == 2 * scaling</label>
+			<label kind="invariant" x="-399" y="-289">cost' == 2 * scaling + 1</label>
 		</location>
 		<location id="id6" x="-416" y="-76">
 			<name x="-442" y="-59">InUse</name>
-			<label kind="invariant" x="-467" y="-34">cost' == 6 * scaling</label>
+			<label kind="invariant" x="-467" y="-34">cost' == 6 * scaling + 1</label>
 		</location>
 		<init ref="id5"/>
 		<transition>
@@ -100,7 +100,8 @@ chan start[M];</declaration>
 // Job(JobID, Machine1, Time1, Machine2, Time2, Reward, Deadline, Scaling)
 Job1:=Job(0, 0, 3, 1, 3, 1, 12, 1);
 Job2:=Job(1, 1, 3, 0, 3, 1, 12, 1);
-//Job3:=Job(2, 1, 3, 1, 3, 2, 12, 2);
+Job3:=Job(2, 1, 3, 1, 3, 2, 15, 1);
+Job4:=Job(3, 0, 3, 0, 3, 2, 15, 1);
 
 // Machine(MachineID, Scaling)
 Machine1:=Machine(0, 1);

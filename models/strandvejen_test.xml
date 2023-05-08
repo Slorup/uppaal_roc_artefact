@@ -15,23 +15,18 @@ chan refill[N];</declaration>
 		<declaration>// Place local declarations here.</declaration>
 		<location id="id0" x="238" y="-17">
 			<name x="212" y="-59">count0</name>
-			<label kind="invariant" x="195" y="-76">cost' == 1</label>
 		</location>
 		<location id="id1" x="110" y="-17">
 			<name x="85" y="-59">count1</name>
-			<label kind="invariant" x="68" y="-76">cost' == 1</label>
 		</location>
 		<location id="id2" x="-17" y="-17">
 			<name x="-42" y="-59">count2</name>
-			<label kind="invariant" x="-59" y="-76">cost' == 1</label>
 		</location>
 		<location id="id3" x="-144" y="-17">
 			<name x="-170" y="-59">count3</name>
-			<label kind="invariant" x="-187" y="-76">cost' == 1</label>
 		</location>
 		<location id="id4" x="-272" y="-17">
 			<name x="-297" y="-59">count4</name>
-			<label kind="invariant" x="-314" y="-76">cost' == 1</label>
 		</location>
 		<init ref="id4"/>
 		<transition>
@@ -137,12 +132,12 @@ x &lt;= 10</label>
 		</location>
 		<location id="id8" x="85" y="0">
 			<name x="51" y="-110">Strandvejen</name>
-			<label kind="invariant" x="51" y="17">cost' == 1 &amp;&amp;
+			<label kind="invariant" x="51" y="25">cost' == 1 &amp;&amp;
 x &lt;= 10</label>
 		</location>
 		<location id="id9" x="-25" y="0">
 			<name x="-51" y="-110">Transit</name>
-			<label kind="invariant" x="-93" y="68">x &lt;= transit_time &amp;&amp;
+			<label kind="invariant" x="-102" y="51">x &lt;= transit_time &amp;&amp;
 cost' == 1</label>
 		</location>
 		<init ref="id7"/>
@@ -159,26 +154,27 @@ cost' == 1</label>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id7"/>
-			<label kind="guard" x="-153" y="51">x == transit_time</label>
-			<label kind="assignment" x="-102" y="34">x:=0</label>
+			<label kind="guard" x="-144" y="34">x == transit_time</label>
+			<label kind="assignment" x="-102" y="8">x:=0</label>
 			<nail x="-85" y="34"/>
 		</transition>
 		<transition>
 			<source ref="id8"/>
 			<target ref="id9"/>
-			<label kind="assignment" x="0" y="34">x := 0</label>
+			<label kind="assignment" x="8" y="8">x := 0</label>
 			<nail x="25" y="34"/>
 		</transition>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id8"/>
 			<label kind="guard" x="-34" y="-51">x == transit_time</label>
+			<label kind="assignment" x="8" y="-25">x :=0</label>
 			<nail x="25" y="-34"/>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id9"/>
-			<label kind="assignment" x="-110" y="-51">x := 0</label>
+			<label kind="assignment" x="-110" y="-25">x := 0</label>
 			<nail x="-85" y="-34"/>
 		</transition>
 		<transition>
@@ -200,7 +196,7 @@ Consumer3 = Consumer(6, 13);
 Volunteer1 = Volunteer(1, 6, 4);
 
 
-system Fridge1, Fridge2, Consumer1, Consumer3, Volunteer1;</system>
+system Fridge1, Fridge2, Volunteer1, Consumer1;</system>
 	<queries>
 		<query>
 			<formula></formula>

@@ -88,18 +88,20 @@ chan refill[N];</declaration>
 		<declaration>clock x;</declaration>
 		<location id="id5" x="8" y="0">
 			<name x="-76" y="-17">Active</name>
-			<label kind="invariant" x="-119" y="0">x &lt;= max_time</label>
+			<label kind="invariant" x="-136" y="0">x &lt;= max_time 
+&amp;&amp; reward' == 2</label>
 		</location>
 		<location id="id6" x="8" y="110">
-			<name x="-76" y="93">Inactive</name>
-			<label kind="invariant" x="-119" y="110">x &lt;= max_time</label>
+			<name x="-76" y="102">Inactive</name>
+			<label kind="invariant" x="34" y="102">x &lt;= max_time 
+&amp;&amp; reward' == 1</label>
 		</location>
 		<init ref="id5"/>
 		<transition>
 			<source ref="id6"/>
 			<target ref="id6"/>
-			<label kind="guard" x="-34" y="161">x == max_time</label>
-			<label kind="assignment" x="-8" y="144">x := 0</label>
+			<label kind="guard" x="-42" y="170">x == max_time</label>
+			<label kind="assignment" x="-7" y="161">x := 0</label>
 			<nail x="51" y="161"/>
 			<nail x="-25" y="161"/>
 		</transition>
@@ -110,10 +112,10 @@ chan refill[N];</declaration>
 		<transition>
 			<source ref="id5"/>
 			<target ref="id5"/>
-			<label kind="select" x="-34" y="-119">r: fridge_id_t</label>
-			<label kind="guard" x="-42" y="-102">x &gt;= min_time</label>
-			<label kind="synchronisation" x="-34" y="-85">withdraw[r]!</label>
-			<label kind="assignment" x="-17" y="-68">x := 0</label>
+			<label kind="select" x="-34" y="-136">r: fridge_id_t</label>
+			<label kind="guard" x="-42" y="-119">x &gt;= min_time</label>
+			<label kind="synchronisation" x="-34" y="-102">withdraw[r]!</label>
+			<label kind="assignment" x="-17" y="-85">x := 0</label>
 			<nail x="-34" y="-68"/>
 			<nail x="51" y="-68"/>
 		</transition>
@@ -123,19 +125,19 @@ chan refill[N];</declaration>
 		<parameter>const int work_reward, const int transit_time, const int min_time</parameter>
 		<declaration>clock x;</declaration>
 		<location id="id7" x="-144" y="0">
-			<name x="-195" y="-119">GroupRoom</name>
+			<name x="-195" y="-110">GroupRoom</name>
 			<label kind="invariant" x="-289" y="-17">reward' == 
 work_reward &amp;&amp;
 x &lt;= 10</label>
 		</location>
 		<location id="id8" x="85" y="0">
 			<name x="51" y="-110">Strandvejen</name>
-			<label kind="invariant" x="59" y="25">cost' == 1 &amp;&amp;
+			<label kind="invariant" x="51" y="25">cost' == 1 &amp;&amp;
 x &lt;= 10</label>
 		</location>
 		<location id="id9" x="-25" y="0">
 			<name x="-51" y="-110">Transit</name>
-			<label kind="invariant" x="-85" y="59">x &lt;= transit_time &amp;&amp;
+			<label kind="invariant" x="-102" y="51">x &lt;= transit_time &amp;&amp;
 cost' == 1</label>
 		</location>
 		<init ref="id7"/>
@@ -143,7 +145,7 @@ cost' == 1</label>
 			<source ref="id7"/>
 			<target ref="id7"/>
 			<label kind="select" x="-195" y="-85">r: fridge_id_t</label>
-			<label kind="guard" x="-195" y="-102">x &gt;= min_time</label>
+			<label kind="guard" x="-195" y="-127">x &gt;= min_time</label>
 			<label kind="synchronisation" x="-187" y="-68">withdraw[r]!</label>
 			<label kind="assignment" x="-170" y="-51">x := 0</label>
 			<nail x="-178" y="-51"/>
@@ -152,7 +154,7 @@ cost' == 1</label>
 		<transition>
 			<source ref="id9"/>
 			<target ref="id7"/>
-			<label kind="guard" x="-153" y="34">x == transit_time</label>
+			<label kind="guard" x="-144" y="34">x == transit_time</label>
 			<label kind="assignment" x="-102" y="8">x:=0</label>
 			<nail x="-85" y="34"/>
 		</transition>
@@ -166,22 +168,20 @@ cost' == 1</label>
 			<source ref="id9"/>
 			<target ref="id8"/>
 			<label kind="guard" x="-34" y="-51">x == transit_time</label>
-			<label kind="assignment" x="8" y="-25">x := 0</label>
 			<nail x="25" y="-34"/>
 		</transition>
 		<transition>
 			<source ref="id7"/>
 			<target ref="id9"/>
-			<label kind="assignment" x="-102" y="-25">x := 0</label>
+			<label kind="assignment" x="-110" y="-25">x := 0</label>
 			<nail x="-85" y="-34"/>
 		</transition>
 		<transition>
 			<source ref="id8"/>
 			<target ref="id8"/>
-			<label kind="select" x="170" y="-42">r: fridge_id_t</label>
-			<label kind="guard" x="170" y="-8">x &gt;= 2</label>
-			<label kind="synchronisation" x="170" y="-25">refill[r]!</label>
-			<label kind="assignment" x="170" y="8">x := 0</label>
+			<label kind="select" x="170" y="-25">r: fridge_id_t</label>
+			<label kind="synchronisation" x="170" y="-8">refill[r]!</label>
+			<label kind="assignment" x="170" y="8">cost += 2</label>
 			<nail x="162" y="-25"/>
 			<nail x="162" y="25"/>
 		</transition>
@@ -195,7 +195,7 @@ Consumer3 = Consumer(6, 13);
 Volunteer1 = Volunteer(1, 6, 4);
 
 
-system Fridge1, Fridge2, Volunteer1, Consumer1, Consumer3;</system>
+system Fridge1, Fridge2, Volunteer1, Consumer1;</system>
 	<queries>
 		<query>
 			<formula></formula>

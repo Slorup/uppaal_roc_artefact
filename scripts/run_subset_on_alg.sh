@@ -38,11 +38,14 @@ for INSTANCE in $ARTEFACT_DIR/models/*${FILTER}*.xml* ; do
     timeout $TIME_LIMIT "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/verifyta" $INSTANCE --roc-alg=${algToNum["${ALG}"]} --ratio-type=1 >> $ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt
     exit_status=$?
     if [[ $exit_status -eq 124 ]]; then
-    	echo "Timed Out" >> $ARTEFACT_DIR/results/$ALG/$filename.txt
+    	echo "Timed Out" >> $ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt
     	echo Timed out running $filename on $ALG
     elif [[ $exit_status -eq 137 ]]; then
-      echo "Out of memory" >> $ARTEFACT_DIR/results/$ALG/$filename.txt
+      echo "Out of memory" >> $ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt
       echo Ran out of memory running $filename on $ALG
+    elif [[ $exit_status -eq 1 ]]; then
+      echo "Maybe ran out of memory?" >> $ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt
+      echo Maybe ran out of memory running $filename on $ALG
     else
       echo Finished running $filename on $ALG
     fi
