@@ -4,10 +4,10 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --error=/nfs/home/student.aau.dk/nsjo18/slurm-output/run-tool-%j.err
 #SBATCH --partition=naples
-#SBATCH --mem=6G
+#SBATCH --mem=5G
 #SBATCH --cpus-per-task=1
 
-let "m=1024*1024*6"
+let "m=1024*1024*5"
 ulimit -v $m
 
 ALG="${1}"
@@ -35,7 +35,7 @@ filename=$(basename ${INSTANCE})
 filename="${filename%.*}"
 [ -f "$ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt" ] && rm "$ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt"
 echo Running $filename on $ALG ..
-timeout $TIME_LIMIT "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/verifyta" $INSTANCE --roc-alg=${algToNum["${ALG}"]} --ratio-type=1 >> $ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt
+/usr/bin/time -f "@@@%e,%M@@@" timeout $TIME_LIMIT "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/verifyta" $INSTANCE --roc-alg=${algToNum["${ALG}"]} --ratio-type=1 &> $ARTEFACT_DIR/results/${algToGitBranchName["${ALG}"]}/$filename.txt
 exit_status=$?
 if [[ $exit_status -eq 124 ]]; then
 	echo "Timed Out" >> $ARTEFACT_DIR/results/$ALG/$filename.txt
