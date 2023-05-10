@@ -14,7 +14,7 @@ algToGitBranchName["lambdadeduction"]="lambdadeduction"
 algToGitBranchName["bdd"]="bdd"
 declare -A algToGitCommit
 algToGitCommit["concretemcr"]="410de2d"
-algToGitCommit["concretemcr_por"]="c408eb8"
+algToGitCommit["concretemcr_por"]="25f60b7"
 algToGitCommit["lambdadeduction"]="a9d1078"
 algToGitCommit["bdd"]="529b66a"
 
