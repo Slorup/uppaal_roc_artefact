@@ -79,13 +79,17 @@ def parse_result_data(result_folder):
                     if res:
                         out_of_memory = True
 
-                    res = re.match("Timed Out", line)
-                    if res:
-                        out_of_time = True
-
                     res = re.match("glp_alloc: no memory available", line)
                     if res:
                         out_of_memory = True
+
+                    res = re.match("Command terminated by signal 11", line)
+                    if res:
+                        out_of_memory = True
+
+                    res = re.match("Timed Out", line)
+                    if res:
+                        out_of_time = True
 
                     res = re.match("Ratio type: Cost/Time", line)
                     if res:
@@ -193,16 +197,15 @@ def sort_results_data(results_data: dict[str, list[InstanceResult]]):
 def prune_instances_not_on_all_algs(data: dict[str, list[InstanceResult]]) -> dict[str, list[InstanceResult]]:
     result_data: dict[str, list[InstanceResult]] = {}
 
-    common_instances = {}
+    common_instances_names = {}
     count = 0
     for alg, instances in data.items():
         if count == 0:
-            common_instances = set(instances)
+            common_instances_names = set([instance.instance_name for instance in instances])
         else:
-            common_instances.intersection(set(instances))
+            new_instance_names = set([instance.instance_name for instance in instances])
+            common_instances_names = common_instances_names.intersection(new_instance_names)
         count += 1
-
-    common_instances_names = set(map(lambda x: x.instance_name, common_instances))
 
     for alg, instances in data.items():
         remaining_instances = [instance for instance in instances if instance.instance_name in common_instances_names]
@@ -248,121 +251,163 @@ def latex_data_structure_size_plot(result_file):
         latex_plot_data_passed += "};\n"
         output_latex_content("data_structure_size_data.txt", latex_plot_legend + latex_plot_data_waiting + latex_plot_data_passed)
 
-def latex_big_table(data: dict[str, list[InstanceResult]], prefix_until_N: str, output_name):
+def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
     alg_to_table_columns: {str: list[str]} = {
-        "lambdadeduction": ["TotalTime", "Memory", "LpsSolved", "NumRatios", "BestRatio"],
-        "mcr": ["TotalTime", "ReductionTime", "HowardTime", "Memory", "NumRatios", "BestRatio"],
-        "mcr_por": ["TotalTime", "ReductionTime", "HowardTime", "PorTime", "Memory", "NumRatios", "BestRatio"]
+        "lambdadeduction": ["TotalTime", "Memory", "LpsSolved", "BestRatio", "BestRatioTime"],
+        "mcr": ["TotalTime", "ReductionTime", "HowardTime", "Memory", "BestRatio", "BestRatioTime"],
+        "mcr_por": ["TotalTime", "ReductionTime", "HowardTime", "PorTime", "Memory", "BestRatio", "BestRatioTime"]
     }
     column_to_table_name: {str: str} = {
-        "TotalTime": "Time",
-        "Memory": "Memory",
-        "LpsSolved": "Lps",
-        "NumRatios": "NumRatios",
+        "TotalTime": "Time (s)",
+        "Memory": "Memory (MB)",
+        "LpsSolved": "LPs",
+        "Iterations": "Iter",
         "BestRatio": "Ratio",
-        "ReductionTime": "Reduc",
-        "HowardTime": "Howard",
-        "PorTime": "Por"
+        "ReductionTime": "Reduc. (s)",
+        "HowardTime": "Howard (s)",
+        "PorTime": "Por (s)",
+        "BestRatioTime": "RatioTime (s)"
     }
     alg_to_table_name: {str: str} = {
         "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction",
-        "mcr": "Concrete MCR",
-        "mcr_por": "Concrete MCR + POR"
+        "mcr": "Concrete-MCR",
+        "mcr_por": "Concrete-MCR + POR"
     }
-    algs = []
-    for (alg, instance_results) in data.items():
-        if len(instance_results) > 0:
-            algs.append(alg)
+
+    data = prune_instances_not_on_all_algs(data)
+    sort_results_data(data)
 
     latex_table = r"\begin{tabular}{c"
-    for alg in algs:
+    for alg in data.keys():
         latex_table += "|"
         for column in alg_to_table_columns[alg]:
-            latex_table += "c"
+            latex_table += "r"
     latex_table += "}\n"
 
-    for alg in algs:
+    for alg in data.keys():
         latex_table += "& \multicolumn{" + str(len(alg_to_table_columns[alg])) + "}{c}{" + alg_to_table_name[alg] + "} "
     latex_table += "\\\\\\hline\n"
 
-    latex_table += "N"
+    latex_table += "Instance"
 
-    for alg in algs:
+    for alg in data.keys():
         for column in alg_to_table_columns[alg]:
             latex_table += " & " + column_to_table_name[column]
-    latex_table += "\\\\\\hline\n"
+    latex_table += "\\\\\\hline"
 
-    sort_results_data(data)
-
-    instance_names = []
+    instance_names: list[str] = []
     for (alg, instance_results) in data.items():
-        if alg not in algs:
+        if alg not in data.keys():
             continue
         else:
             instance_names = [instance_result.instance_name for instance_result in instance_results]
             break
 
+    previous_instance_name = ""
     for instance_name in instance_names:
-        res = re.match(prefix_until_N + r"(\d+)", instance_name)
-        if not res:
-            continue
-        latex_table += res.group(1)
+        if instance_name.split("_")[0] != previous_instance_name.split("_")[0]:
+            latex_table += "\hline\n"
+        instance_latex_table = ""
+        previous_instance_name = instance_name
+        instance_latex_table += instance_name.replace("_", "\_").replace("strandvejen", "strdvj")
+        best_time_for_instance = 1000000
+        best_memory_for_instance = 1000000
+        best_ratio_for_instance = 1000000
+        best_ratiotime_for_instance = 1000000
+
         for (alg, instance_results) in data.items():
-            if alg not in algs:
-                continue
             instance_result: InstanceResult = [instance_result for instance_result in instance_results if instance_result.instance_name == instance_name][0]
             for column in alg_to_table_columns[alg]:
-                latex_table += " & "
+                instance_latex_table += " & "
                 match column:
                     case "TotalTime":
                         if instance_result.out_of_time:
-                            latex_table += "OOT"
-                        elif instance_result.time_to_finish >= 10000:
-                            latex_table += f"{int(instance_result.time_to_finish / 1000)}s"
+                            instance_latex_table += "OOT"
                         elif instance_result.time_to_finish != -1:
-                            latex_table += f"{instance_result.time_to_finish}ms"
+                            time_to_finish = (instance_result.time_to_finish / 1000)
+                            if time_to_finish < best_time_for_instance:
+                                instance_latex_table = instance_latex_table.replace("-besttime-", "")
+                                instance_latex_table += "-besttime-"
+                                best_time_for_instance = time_to_finish
+                            elif time_to_finish == best_time_for_instance:
+                                instance_latex_table += "-besttime-"
+                            instance_latex_table += "%.3f" % time_to_finish
                         else:
-                            latex_table += "N/A"
+                            instance_latex_table += "-"
                     case "Memory":
                         if instance_result.out_of_memory:
-                            latex_table += "OOM"
+                            instance_latex_table += "OOM"
                         elif instance_result.memory != -1:
-                            latex_table += f"{int(instance_result.memory/1024)}mb"
+                            memory = (instance_result.memory / 1000)
+                            if memory < best_memory_for_instance:
+                                instance_latex_table = instance_latex_table.replace("-bestmemory-", "")
+                                instance_latex_table += "-bestmemory-"
+                                best_memory_for_instance = memory
+                            elif memory == best_memory_for_instance:
+                                instance_latex_table += "-bestmemory-"
+                            instance_latex_table += "%.3f" % memory
                         else:
-                            latex_table += "N/A"
+                            instance_latex_table += "-"
                     case "LpsSolved":
-                        latex_table += f"{instance_result.total_lp_count}"
-                    case "NumRatios":
-                        latex_table += f"{len(instance_result.ratios)}"
+                        instance_latex_table += f"{instance_result.total_lp_count}"
+                    case "Iterations":
+                        instance_latex_table += f"{len(instance_result.ratios) + 1}"
                     case "BestRatio":
                         if len(instance_result.ratios) > 0:
-                            latex_table += "%.4f" % instance_result.ratios[-1][0]
+                            best_ratio = float("%.4f" % instance_result.ratios[-1][0])
+                            if best_ratio < best_ratio_for_instance:
+                                instance_latex_table = instance_latex_table.replace("-bestratio-", "")
+                                instance_latex_table += "-bestratio-"
+                                best_ratio_for_instance = float("%.4f" % best_ratio)
+                            elif best_ratio == best_ratio_for_instance:
+                                instance_latex_table += "-bestratio-"
+                            instance_latex_table += "%.4f" % best_ratio
                         elif not instance_result.out_of_time and not instance_result.out_of_memory:
-                            latex_table += "No sol."
+                            instance_latex_table += "\\textbf{No sol.}"
+                            best_ratio_for_instance = -1
                         else:
-                            latex_table += "N/A"
+                            instance_latex_table += "-"
+                    case "BestRatioTime":
+                        if len(instance_result.ratios) > 0:
+                            best_ratio_time = instance_result.ratios[-1][1] / 1000
+                            if best_ratio_time < best_ratiotime_for_instance:
+                                instance_latex_table = instance_latex_table.replace("-bestratiotime-", "")
+                                instance_latex_table += "-bestratiotime-"
+                                best_ratiotime_for_instance = best_ratio_time
+                            elif best_ratio_time == best_ratiotime_for_instance:
+                                instance_latex_table += "-bestratiotime-"
+                            instance_latex_table += "%.3f" % best_ratio_time
+                        else:
+                            instance_latex_table += "-"
                     case "ReductionTime":
                         if instance_result.mcr_reduction_time == -1:
-                            latex_table += "N/A"
-                        elif instance_result.mcr_reduction_time >= 10000:
-                            latex_table += f"{int(instance_result.mcr_reduction_time / 1000)}s"
+                            instance_latex_table += "-"
                         else:
-                            latex_table += f"{instance_result.mcr_reduction_time}ms"
+                            instance_latex_table += "%.3f" % (instance_result.mcr_reduction_time / 1000)
                     case "HowardTime":
                         if instance_result.howards_time == -1:
-                            latex_table += "N/A"
-                        elif instance_result.howards_time >= 10000:
-                            latex_table += f"{int(instance_result.howards_time / 1000)}s"
+                            instance_latex_table += "-"
                         else:
-                            latex_table += f"{instance_result.howards_time}ms"
+                            instance_latex_table += "%.3f" % (instance_result.howards_time / 1000)
                     case "PorTime":
                         if instance_result.por_time == -1:
-                            latex_table += "N/A"
-                        elif instance_result.por_time >= 10000:
-                            latex_table += f"{int(instance_result.por_time / 1000)}s"
+                            instance_latex_table += "-"
                         else:
-                            latex_table += f"{instance_result.por_time}ms"
-        latex_table += "\\\\\\hline\n"
+                            instance_latex_table += "%.3f" % (instance_result.por_time / 1000)
+        instance_latex_table += "\\\\\\hline\n"
+        res = re.findall(r"-bestratio-(\d+.\d+)", instance_latex_table)
+        for r in res:
+            instance_latex_table = instance_latex_table.replace(f"-bestratio-{r}", "\\textbf{" + r + "}")
+        res = re.findall(r"-besttime-(\d+.\d+)", instance_latex_table)
+        for r in res:
+            instance_latex_table = instance_latex_table.replace(f"-besttime-{r}", "\\textbf{" + r + "}")
+        res = re.findall(r"-bestratiotime-(\d+.\d+)", instance_latex_table)
+        for r in res:
+            instance_latex_table = instance_latex_table.replace(f"-bestratiotime-{r}", "\\textbf{" + r + "}")
+        res = re.findall(r"-bestmemory-(\d+.\d+)", instance_latex_table)
+        for r in res:
+            instance_latex_table = instance_latex_table.replace(f"-bestmemory-{r}", "\\textbf{" + r + "}")
+        latex_table += instance_latex_table
     latex_table += "\\end{tabular}"
     output_latex_content(f"{output_name}.txt", latex_table)
 
@@ -375,18 +420,18 @@ def filter_to_specific_algs(data: dict[str, list[InstanceResult]], algs: list[st
 
 os.chdir("../results")
 result_data = parse_result_data(os.getcwd())
-# result_data = prune_instances_not_on_all_algs(result_data)
 # result_data = prune_instances_containing_str(result_data, "plus1")
-result_data = filter_instances_to_contain_str(result_data, "job")
+# result_data = filter_instances_to_contain_str(result_data, "surveil")
 result_data = prune_instances_containing_str(result_data, "scaling")
 result_data = filter_to_specific_algs(result_data, ["mcr", "lambdadeduction"])
+# result_data = prune_instances_not_on_all_algs(result_data)
 
 os.chdir("../")
 latex_dir = os.path.join(os.getcwd(), f"latex")
 if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
 
-latex_big_table(result_data, "job_m2_j", "big_table_job_data")
+latex_big_table(result_data, "big_table_data")
 # latex_data_structure_size_plot(os.getcwd() + "/results/lambdadeduction/strandvejen_test_f2_v1_c1.txt")
 # latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
 #latex_ratio_step_plots_all_instances(result_data)
