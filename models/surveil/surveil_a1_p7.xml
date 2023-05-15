@@ -4,7 +4,7 @@
 	<declaration>// Place global declarations here.
 
 
-const int N = 3;      // # Parts
+const int N = 7;      // # Parts
 
 typedef scalar[N] id_t;
 
