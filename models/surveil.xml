@@ -5,8 +5,10 @@
 
 
 const int N = 3;      // # Parts
+const int A = 1;      // # Agents
 
 typedef scalar[N] id_t;
+typedef scalar[A] pid_t;
 
 chan surveil[id_t];
 </declaration>
@@ -71,6 +73,7 @@ x &lt;= 10</label>
 	</template>
 	<template>
 		<name>Agent</name>
+		<parameter>const pid_t id</parameter>
 		<declaration>
 
 clock y;</declaration>

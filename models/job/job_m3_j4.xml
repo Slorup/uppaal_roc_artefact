@@ -2,7 +2,7 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-const int M = 2; // # Machines
+const int M = 3; // # Machines
 
 typedef int[0, M-1] mid_t;
 
@@ -97,13 +97,13 @@ chan start[M];</declaration>
 	</template>
 	<system>// Place template instantiations here.
 // id, m1, t1, m2, t2, reward, deadline
-Job1:=Job(0, 0, 3, 1, 3, 1, 12);
-Job2:=Job(1, 1, 3, 0, 3, 1, 12);
-Job3:=Job(2, 1, 3, 1, 3, 2, 15);
-Job4:=Job(3, 0, 3, 0, 3, 2, 15);
+Job1:=Job(0, 0, 3, 2, 3, 1, 12);
+Job2:=Job(1, 1, 3, 2, 3, 1, 12);
+Job3:=Job(2, 2, 3, 1, 3, 1, 15);
+Job4:=Job(3, 1, 3, 0, 3, 1, 15);
 
 // List one or more processes to be composed into a system.
-system Machine, Job1, Job2;</system>
+system Machine, Job1, Job2, Job3, Job4;</system>
 	<queries>
 		<query>
 			<formula></formula>

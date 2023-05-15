@@ -190,6 +190,13 @@ class InstanceResult:
         self.total_lp_count = total_lp_count
         self.memory = memory
 
+    def get_value(self, category_str):
+        match category_str:
+            case "Time":
+                return self.time_to_finish / 1000 if self.time_to_finish != -1 else -1
+            case "Memory":
+                return self.memory / 1000 if self.memory != -1 else -1
+
 def sort_results_data(results_data: dict[str, list[InstanceResult]]):
     for alg, instances in results_data.items():
         results_data[alg] = sorted(instances, key=lambda x: x.instance_name)
@@ -253,7 +260,8 @@ def latex_data_structure_size_plot(result_file):
 
 def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
     alg_to_table_columns: {str: list[str]} = {
-        "lambdadeduction": ["TotalTime", "Memory", "LpsSolved", "BestRatio", "BestRatioTime"],
+        "lambdadeduction": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_lp": ["TotalTime", "Memory", "LpsSolved", "BestRatio", "BestRatioTime"],
         "mcr": ["TotalTime", "ReductionTime", "HowardTime", "Memory", "BestRatio", "BestRatioTime"],
         "mcr_por": ["TotalTime", "ReductionTime", "HowardTime", "PorTime", "Memory", "BestRatio", "BestRatioTime"]
     }
@@ -270,6 +278,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
     }
     alg_to_table_name: {str: str} = {
         "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction",
+        "lambdadeduction_lp": "Symbolic $\lambda$\\nobreakdash-deduction with LP",
         "mcr": "Concrete-MCR",
         "mcr_por": "Concrete-MCR + POR"
     }
@@ -297,11 +306,8 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
 
     instance_names: list[str] = []
     for (alg, instance_results) in data.items():
-        if alg not in data.keys():
-            continue
-        else:
-            instance_names = [instance_result.instance_name for instance_result in instance_results]
-            break
+        instance_names = [instance_result.instance_name for instance_result in instance_results]
+        break
 
     previous_instance_name = ""
     for instance_name in instance_names:
@@ -411,6 +417,42 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
     latex_table += "\\end{tabular}"
     output_latex_content(f"{output_name}.txt", latex_table)
 
+def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_name, category_name, output_name):
+    data = prune_instances_not_on_all_algs(data)
+    sort_results_data(data)
+
+    instance_names: list[str] = []
+    for (alg, instance_results) in data.items():
+        instance_names = [instance_result.instance_name for instance_result in instance_results]
+        break
+
+    latex_plot_data = "\\addplot+[only marks, mark=+, color=black] coordinates {\n"
+
+    did_not_finish_value = 1000
+    min_value = 0.001
+    for instance_name in instance_names:
+        x_alg_value = -1
+        y_alg_value = -1
+        for (alg, instance_results) in data.items():
+            instance_result: InstanceResult = [instance_result for instance_result in instance_results if instance_result.instance_name == instance_name][0]
+            if alg == x_alg_name:
+                val = instance_result.get_value(category_name)
+                if val == -1:
+                    x_alg_value = did_not_finish_value
+                else:
+                    x_alg_value = val if val >= min_value else min_value
+            elif alg == y_alg_name:
+                val = instance_result.get_value(category_name)
+                if val == -1:
+                    y_alg_value = did_not_finish_value
+                else:
+                    y_alg_value = val if val >= min_value else min_value
+            else:
+                continue
+        latex_plot_data += f"({x_alg_value}, {y_alg_value}) "
+    latex_plot_data += "\n};"
+    output_latex_content(f"{output_name}.txt", latex_plot_data)
+
 def filter_to_specific_algs(data: dict[str, list[InstanceResult]], algs: list[str]) -> dict[str, list[InstanceResult]]:
     result_data: dict[str, list[InstanceResult]] = {}
     for alg, instances in data.items():
@@ -423,7 +465,7 @@ result_data = parse_result_data(os.getcwd())
 # result_data = prune_instances_containing_str(result_data, "plus1")
 # result_data = filter_instances_to_contain_str(result_data, "surveil")
 result_data = prune_instances_containing_str(result_data, "scaling")
-result_data = filter_to_specific_algs(result_data, ["mcr", "lambdadeduction"])
+result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_lp"])
 # result_data = prune_instances_not_on_all_algs(result_data)
 
 os.chdir("../")
@@ -431,7 +473,8 @@ latex_dir = os.path.join(os.getcwd(), f"latex")
 if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
 
-latex_big_table(result_data, "big_table_data")
+latex_scatter_plot(result_data, "lambdadeduction", "lambdadeduction_lp", "Time", "scatter_plot_time_data")
+# latex_big_table(result_data, "big_table_data")
 # latex_data_structure_size_plot(os.getcwd() + "/results/lambdadeduction/strandvejen_test_f2_v1_c1.txt")
 # latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
 #latex_ratio_step_plots_all_instances(result_data)

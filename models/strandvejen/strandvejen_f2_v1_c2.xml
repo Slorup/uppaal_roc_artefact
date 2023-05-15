@@ -168,6 +168,7 @@ cost' == 1</label>
 			<source ref="id9"/>
 			<target ref="id8"/>
 			<label kind="guard" x="-34" y="-51">x == transit_time</label>
+			<label kind="assignment" x="8" y="-25">x:=0</label>
 			<nail x="25" y="-34"/>
 		</transition>
 		<transition>
@@ -193,7 +194,7 @@ Consumer1 = Consumer(3, 6);
 Consumer2 = Consumer(3, 5);
 Consumer3 = Consumer(6, 13);
 Volunteer1 = Volunteer(1, 6, 4);
-
+Volunteer2 = Volunteer(1, 8, 5);
 
 system Fridge1, Fridge2, Volunteer1, Consumer1, Consumer2;</system>
 	<queries>

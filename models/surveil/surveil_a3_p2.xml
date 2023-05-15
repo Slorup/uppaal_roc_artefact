@@ -3,8 +3,8 @@
 <nta>
 	<declaration>// Place global declarations here.
 
-const int N = 4;      // # Parts
-const int A = 1;      // # Agents
+const int N = 2;      // # Parts
+const int A = 3;      // # Agents
 
 typedef scalar[N] id_t;
 typedef scalar[A] pid_t;

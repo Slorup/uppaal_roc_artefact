@@ -4,7 +4,7 @@
 	<declaration>// Place global declarations here.
 
 const int N = 4;      // # Parts
-const int A = 1;      // # Agents
+const int A = 2;      // # Agents
 
 typedef scalar[N] id_t;
 typedef scalar[A] pid_t;
