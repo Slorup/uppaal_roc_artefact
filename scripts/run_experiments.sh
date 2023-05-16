@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "lambdadeduction_lp" "lambdadeduction_clean_waiting")
 
 if (( $# < 5 ))
 then
@@ -17,15 +17,14 @@ MAX_INSTANCES="$4"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-
 if [ "$5" != "all" ]
 then
   ALGS_TO_RUN=("${@:5}")
 fi
 
-cd $SCRIPT_DIR || exit
+cd "$SCRIPT_DIR" || exit
 
 for ALG in "${ALGS_TO_RUN[@]}"
 do
-  ./run_subset_on_alg.sh "$ALG" $TIMEOUT_SECONDS $MAX_INSTANCES "$FILTER" "$EXECUTABLE_FOLDER"
+  ./run_subset_on_alg.sh "$ALG" "$TIMEOUT_SECONDS" "$MAX_INSTANCES" "$FILTER" "$EXECUTABLE_FOLDER"
 done

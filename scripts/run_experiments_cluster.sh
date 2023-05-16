@@ -6,7 +6,7 @@
 #SBATCH --mem=5G
 #SBATCH --cpus-per-task=1
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "lambdadeduction_lp" "lambdadeduction_clean_waiting")
 
 if (( $# < 5 ))
 then
@@ -30,15 +30,15 @@ then
   ALGS_TO_RUN=("${@:5}")
 fi
 
-cd $SCRIPT_DIR || exit
+cd "$SCRIPT_DIR" || exit
 
 for ALG in "${ALGS_TO_RUN[@]}" ; do
   count=0
   for INSTANCE in $ARTEFACT_DIR/models/*${FILTER}*.xml* ; do
     [[ -e "$INSTANCE" ]] || break
-    if [ $count -le $MAX_INSTANCES ]
+    if [ $count -le "$MAX_INSTANCES" ]
     then
-      ./run_instance.sh "$ALG" $TIMEOUT_SECONDS "$INSTANCE" "$EXECUTABLE_FOLDER" "$ARTEFACT_DIR"
+      ./run_instance.sh "$ALG" "$TIMEOUT_SECONDS" "$INSTANCE" "$EXECUTABLE_FOLDER" "$ARTEFACT_DIR"
     fi
     (( count++ ))
   done

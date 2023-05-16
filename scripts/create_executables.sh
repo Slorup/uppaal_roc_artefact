@@ -7,15 +7,10 @@ EXECUTABLE_DIR="${ARTEFACT_DIR}/executables"
 
 mkdir -p $EXECUTABLE_DIR
 
-declare -A algToGitBranchName
-algToGitBranchName["concretemcr"]="mcr"
-algToGitBranchName["concretemcr_por"]="mcr_por"
-algToGitBranchName["lambdadeduction"]="lambdadeduction"
-algToGitBranchName["bdd"]="bdd"
 declare -A algToGitCommit
 algToGitCommit["concretemcr"]="410de2d"
 algToGitCommit["concretemcr_por"]="25f60b7"
-algToGitCommit["lambdadeduction"]="a9d1078"
+algToGitCommit["lambdadeduction"]="4fa1a9a"
 algToGitCommit["bdd"]="529b66a"
 
 declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
@@ -25,15 +20,17 @@ then
   ALGS_TO_RUN=("${@:2}")
 fi
 
+cd "$UPPAAL_FOLDER" || exit
+PREVIOUS_BRANCH=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+
 for ALG in "${ALGS_TO_RUN[@]}"
 do
-  echo Switching to git branch: ${algToGitBranchName["${ALG}"]}
-  cd $UPPAAL_FOLDER || exit
-  git checkout ${algToGitBranchName["${ALG}"]}
+  echo Switching to git branch: "$ALG"
+  cd "$UPPAAL_FOLDER" || exit
   git checkout ${algToGitCommit["${ALG}"]}
   bash ./server/scripts/cmakew.bash
 
-  EXE_DIR="${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}"
+  EXE_DIR="${EXECUTABLE_DIR}/$ALG"
 
   mkdir -p "$EXE_DIR"
 
@@ -58,3 +55,7 @@ do
   cp -v "${SCRIPT_DIR}/ld-linux-x86-64.so.2" "${EXE_DIR}"
 done
 
+if [[ "${PREVIOUS_BRANCH}" != *"detached"* ]]; then
+  echo Switching git branch back to "$PREVIOUS_BRANCH"
+  git checkout "$PREVIOUS_BRANCH"
+fi

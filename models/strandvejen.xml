@@ -125,7 +125,7 @@ chan refill[N];</declaration>
 		<parameter>const int work_reward, const int transit_time, const int min_time</parameter>
 		<declaration>clock x;</declaration>
 		<location id="id7" x="-144" y="0">
-			<name x="-195" y="-110">GroupRoom</name>
+			<name x="-195" y="-119">GroupRoom</name>
 			<label kind="invariant" x="-289" y="-17">reward' == 
 work_reward &amp;&amp;
 x &lt;= 10</label>
@@ -145,7 +145,7 @@ cost' == 1</label>
 			<source ref="id7"/>
 			<target ref="id7"/>
 			<label kind="select" x="-195" y="-85">r: fridge_id_t</label>
-			<label kind="guard" x="-195" y="-127">x &gt;= min_time</label>
+			<label kind="guard" x="-195" y="-102">x &gt;= min_time</label>
 			<label kind="synchronisation" x="-187" y="-68">withdraw[r]!</label>
 			<label kind="assignment" x="-170" y="-51">x := 0</label>
 			<nail x="-178" y="-51"/>

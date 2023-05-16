@@ -12,10 +12,45 @@ instance_to_ratio_dict: {str: float} = {
 }
 
 alg_to_plot_options_dict: {str: str} = {
-    "mcr": "mark=*, mark options={solid}, color=red, loosely dashed, thick",
-    "mcr_por": "mark=*, mark options={solid}, color=green, thick",
-    "lambdadeduction": "mark=*, mark options={solid}, color=blue, dashed, thick"
+    "concretemcr": "color=red, loosely dashed, thick",
+    "concretemcr_por": "color=green, thick",
+    "lambdadeduction": "color=blue, dashed, thick",
+    "lambdadeduction_lp": "color=purple, thick",
+    "lambdadeduction_clean_waiting": "color=green, dotted"
 }
+
+alg_to_table_name: {str: str} = {
+    "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction",
+    "lambdadeduction_lp": "Symbolic $\lambda$\\nobreakdash-deduction without transformation matrices",
+    "lambdadeduction_clean_waiting": "Symbolic $\lambda$\\nobreakdash-deduction with waiting list cleanup",
+    "concretemcr": "Concrete-MCR",
+    "concretemcr_por": "Concrete-MCR + POR"
+}
+
+class InstanceResult:
+    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory):
+        self.instance_name = instance_name
+        self.ratios = ratios
+        self.time_to_find_stored_optimal = time_to_find_optimal
+        self.time_to_finish = time_to_finish
+        self.scaling_factor = scaling_factor
+        self.finished = finished
+        self.out_of_memory = out_of_memory
+        self.out_of_time = out_of_time
+        self.uses_cost_reward = uses_cost_reward
+        self.mcr_states = mcr_states
+        self.howards_time = howards_time
+        self.por_time = por_time
+        self.mcr_reduction_time = mcr_reduction_time
+        self.total_lp_count = total_lp_count
+        self.memory = memory
+
+    def get_value(self, category_str):
+        match category_str:
+            case "Time":
+                return self.time_to_finish / 1000 if self.time_to_finish != -1 else -1
+            case "Memory":
+                return self.memory / 1000 if self.memory != -1 else -1
 
 def parse_result_data(result_folder):
     result_dict: dict[str, list[InstanceResult]] = {}
@@ -126,12 +161,12 @@ def parse_result_data(result_folder):
     return result_dict
 
 
-def latex_ratio_step_plots_all_instances(data):
+def latex_ratio_step_plots_all_instances(data: dict[str, list[InstanceResult]]):
     alg, instance_results = list(data.items())[0]
     for instance in instance_results:
         latex_ratio_step_plot(data, instance.instance_name)
 
-def latex_ratio_step_plot(data, instance_name):
+def latex_ratio_step_plot(data: dict[str, list[InstanceResult]], instance_name):
     latex_plot_legend = r"\legend{"
     for alg in data.keys():
         latex_plot_legend += f"{alg}, "
@@ -139,7 +174,7 @@ def latex_ratio_step_plot(data, instance_name):
 
     latex_plot_data = ""
     for (alg, instance_results) in data.items():
-        latex_plot_data += r"\addplot" + f"[const plot, {alg_to_plot_options_dict[alg]}] coordinates" + "{\n"
+        latex_plot_data += r"\addplot" + "[const plot, mark=*, mark options={solid}, " + f"{alg_to_plot_options_dict[alg]}] coordinates" + "{\n"
 
         instance_result = [instance_result for instance_result in instance_results if instance_result.instance_name == instance_name][0]
         for ratio, time, lp_count in instance_result.ratios:
@@ -149,7 +184,7 @@ def latex_ratio_step_plot(data, instance_name):
 
     output_latex_content(f"{instance_name}_ratio_step_plot_data.txt", latex_plot_legend + latex_plot_data)
 
-def latex_constant_scaling_plot(data, output_name):
+def latex_constant_scaling_plot(data: dict[str, list[InstanceResult]], output_name):
     latex_plot_legend = r"\legend{"
     for alg in data.keys():
         latex_plot_legend += f"{alg}, "
@@ -157,7 +192,7 @@ def latex_constant_scaling_plot(data, output_name):
 
     latex_plot_data = ""
     for (alg, instance_results) in data.items():
-        latex_plot_data += r"\addplot" + f"[{alg_to_plot_options_dict[alg]}] coordinates" + "{\n"
+        latex_plot_data += r"\addplot[mark=*, mark options={solid}, " +  f"{alg_to_plot_options_dict[alg]}] coordinates" + "{\n"
         #Finds all instances that contains 'instance_name' in their name and has a scaling factor
         scaling_instances = [instance_result for instance_result in instance_results if instance_result.scaling_factor != -1]
         scaling_instances = sorted(scaling_instances, key=lambda x: x.scaling_factor)
@@ -167,35 +202,40 @@ def latex_constant_scaling_plot(data, output_name):
         latex_plot_data += r"};" + "\n"
     output_latex_content(f"{output_name}.txt", latex_plot_legend + latex_plot_data)
 
+def latex_cactus_plot(data: dict[str, list[InstanceResult]], category, output_name):
+    data = prune_instances_not_on_all_algs(data)
+    sort_results_data(data)
+
+    instance_count = 0
+    for (alg, instance_results) in data.items():
+        instance_names = [instance_result.instance_name for instance_result in instance_results]
+        instance_count = len(instance_names)
+        break
+
+    latex_plot_data = "\legend{"
+    for alg in data.keys():
+        latex_plot_data += alg_to_table_name[alg] + ", "
+    latex_plot_data += "}\n% Number of instances: " + str(instance_count) + "\n"
+
+    did_not_finish_replacement_val = 1000
+    min_value = 0.001
+    for alg, instance_results in data.items():
+        latex_plot_data += "\\addplot[mark=none, " + f"{alg_to_plot_options_dict[alg]}" + "] coordinates {\n"
+        count = 0
+        for instance_result in sorted(instance_results, key=lambda x: x.get_value(category)):
+            val = instance_result.get_value(category)
+            if val == -1:
+                continue
+            latex_plot_data += f"({count}, {val if val >= min_value else 0.001}) %{instance_result.instance_name} \n"
+            count += 1
+        latex_plot_data += "};\n"
+
+    output_latex_content(f"{output_name}.txt", latex_plot_data)
+
 def output_latex_content(file_name, content):
     print(f"Writing to file: 'latex/{file_name}'")
     latex_file_table = open(os.path.join(os.getcwd(), f"latex/{file_name}"), "w")
     latex_file_table.write(content)
-
-class InstanceResult:
-    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory):
-        self.instance_name = instance_name
-        self.ratios = ratios
-        self.time_to_find_stored_optimal = time_to_find_optimal
-        self.time_to_finish = time_to_finish
-        self.scaling_factor = scaling_factor
-        self.finished = finished
-        self.out_of_memory = out_of_memory
-        self.out_of_time = out_of_time
-        self.uses_cost_reward = uses_cost_reward
-        self.mcr_states = mcr_states
-        self.howards_time = howards_time
-        self.por_time = por_time
-        self.mcr_reduction_time = mcr_reduction_time
-        self.total_lp_count = total_lp_count
-        self.memory = memory
-
-    def get_value(self, category_str):
-        match category_str:
-            case "Time":
-                return self.time_to_finish / 1000 if self.time_to_finish != -1 else -1
-            case "Memory":
-                return self.memory / 1000 if self.memory != -1 else -1
 
 def sort_results_data(results_data: dict[str, list[InstanceResult]]):
     for alg, instances in results_data.items():
@@ -261,9 +301,10 @@ def latex_data_structure_size_plot(result_file):
 def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
     alg_to_table_columns: {str: list[str]} = {
         "lambdadeduction": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
-        "lambdadeduction_lp": ["TotalTime", "Memory", "LpsSolved", "BestRatio", "BestRatioTime"],
-        "mcr": ["TotalTime", "ReductionTime", "HowardTime", "Memory", "BestRatio", "BestRatioTime"],
-        "mcr_por": ["TotalTime", "ReductionTime", "HowardTime", "PorTime", "Memory", "BestRatio", "BestRatioTime"]
+        "lambdadeduction_lp": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_clean_waiting": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "concretemcr": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "concretemcr_por": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"]
     }
     column_to_table_name: {str: str} = {
         "TotalTime": "Time (s)",
@@ -275,12 +316,6 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
         "HowardTime": "Howard (s)",
         "PorTime": "Por (s)",
         "BestRatioTime": "RatioTime (s)"
-    }
-    alg_to_table_name: {str: str} = {
-        "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction",
-        "lambdadeduction_lp": "Symbolic $\lambda$\\nobreakdash-deduction with LP",
-        "mcr": "Concrete-MCR",
-        "mcr_por": "Concrete-MCR + POR"
     }
 
     data = prune_instances_not_on_all_algs(data)
@@ -329,7 +364,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
                     case "TotalTime":
                         if instance_result.out_of_time:
                             instance_latex_table += "OOT"
-                        elif instance_result.time_to_finish != -1:
+                        elif instance_result.finished:
                             time_to_finish = (instance_result.time_to_finish / 1000)
                             if time_to_finish < best_time_for_instance:
                                 instance_latex_table = instance_latex_table.replace("-besttime-", "")
@@ -343,7 +378,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
                     case "Memory":
                         if instance_result.out_of_memory:
                             instance_latex_table += "OOM"
-                        elif instance_result.memory != -1:
+                        elif instance_result.finished:
                             memory = (instance_result.memory / 1000)
                             if memory < best_memory_for_instance:
                                 instance_latex_table = instance_latex_table.replace("-bestmemory-", "")
@@ -473,7 +508,8 @@ latex_dir = os.path.join(os.getcwd(), f"latex")
 if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
 
-latex_scatter_plot(result_data, "lambdadeduction", "lambdadeduction_lp", "Time", "scatter_plot_time_data")
+# latex_cactus_plot(result_data, "Time", "cactus_time_data")
+# latex_scatter_plot(result_data, "lambdadeduction", "lambdadeduction_lp", "Time", "scatter_plot_time_data")
 # latex_big_table(result_data, "big_table_data")
 # latex_data_structure_size_plot(os.getcwd() + "/results/lambdadeduction/strandvejen_test_f2_v1_c1.txt")
 # latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
