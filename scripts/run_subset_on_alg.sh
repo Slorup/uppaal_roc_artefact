@@ -1,6 +1,6 @@
 #!/bin/bash
 
-let "m=1024*1024*5"
+let "m=1000*1000*5"
 ulimit -v $m
 
 ALG="${1}"
