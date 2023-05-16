@@ -28,7 +28,7 @@ alg_to_table_name: {str: str} = {
 }
 
 class InstanceResult:
-    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory):
+    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory, clean_waiting, no_transformation_matrix):
         self.instance_name = instance_name
         self.ratios = ratios
         self.time_to_find_stored_optimal = time_to_find_optimal
@@ -44,6 +44,8 @@ class InstanceResult:
         self.mcr_reduction_time = mcr_reduction_time
         self.total_lp_count = total_lp_count
         self.memory = memory
+        self.clean_waiting = clean_waiting
+        self.no_transformation_matrix = no_transformation_matrix
 
     def get_value(self, category_str):
         match category_str:
@@ -74,6 +76,8 @@ def parse_result_data(result_folder):
                 out_of_memory = False
                 out_of_time = False
                 uses_cost_reward = True
+                clean_waiting_list = False
+                no_transformation_matrix = False
                 instance_name = instance.split('.')[0]
                 if instance_name in instance_to_ratio_dict:
                     optimal_ratio = instance_to_ratio_dict[instance_name]
@@ -134,6 +138,14 @@ def parse_result_data(result_folder):
                     if res:
                         mcr_states = res.group(1)
 
+                    res = re.match(r"Clean waiting list each iteration: (\d)", line)
+                    if res:
+                        clean_waiting_list = res.group(1) == "1"
+
+                    res = re.match(r"No transformation matrix usage: (\d)", line)
+                    if res:
+                        no_transformation_matrix = res.group(1) == "1"
+
                     res = re.match(r"Howard's - MCR solving time: (\d+)", line)
                     if res:
                         howards_time = res.group(1)
@@ -155,7 +167,7 @@ def parse_result_data(result_folder):
                 if res:
                     scaling_factor = res.group(1)
                 finished = not out_of_time and not out_of_memory
-                res = InstanceResult(instance_name, ratios, int(optimal_ratio_time), int(total_time), int(scaling_factor), finished, out_of_memory, out_of_time, uses_cost_reward, int(mcr_states), int(howards_time), int(por_time), int(mcr_reduction_time), int(lp_total_count), int(memory))
+                res = InstanceResult(instance_name, ratios, int(optimal_ratio_time), int(total_time), int(scaling_factor), finished, out_of_memory, out_of_time, uses_cost_reward, int(mcr_states), int(howards_time), int(por_time), int(mcr_reduction_time), int(lp_total_count), int(memory), clean_waiting_list, no_transformation_matrix)
                 result_dict[alg_name].append(res)
         alg_progress += 1
     return result_dict
