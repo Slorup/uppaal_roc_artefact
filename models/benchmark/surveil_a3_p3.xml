@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+
+const int N = 3;      // # Parts
+const int A = 3;      // # Agents
+
+typedef scalar[N] id_t;
+typedef scalar[A] pid_t;
+
+chan surveil[id_t];
+</declaration>
+	<template>
+		<name x="5" y="5">Place</name>
+		<parameter>const id_t id</parameter>
+		<declaration>// Place local declarations here.
+
+clock x;</declaration>
+		<location id="id0" x="-365" y="-85">
+			<name x="-382" y="-76">a</name>
+			<label kind="invariant" x="-391" y="-144">cost'==0 and 
+x &lt;= 10</label>
+		</location>
+		<location id="id1" x="-221" y="-85">
+			<name x="-238" y="-76">b</name>
+			<label kind="invariant" x="-247" y="-144">cost'==2 and 
+x &lt;= 10</label>
+		</location>
+		<location id="id2" x="-76" y="-85">
+			<name x="-93" y="-76">c</name>
+			<label kind="invariant" x="-101" y="-144">cost'==5 and
+x &lt;= 10</label>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-323" y="-34">surveil[id]?</label>
+			<label kind="assignment" x="-314" y="-51">x:=0</label>
+			<nail x="-221" y="-34"/>
+			<nail x="-331" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-187" y="0">surveil[id]?</label>
+			<label kind="assignment" x="-357" y="0">x := 0</label>
+			<nail x="-76" y="0"/>
+			<nail x="-365" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-510" y="-102">surveil[id]?</label>
+			<label kind="assignment" x="-476" y="-85">x:=0</label>
+			<nail x="-433" y="-59"/>
+			<nail x="-433" y="-127"/>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-204" y="-102">x==10</label>
+			<label kind="assignment" x="-144" y="-102">x := 0</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-348" y="-102">x==10</label>
+			<label kind="assignment" x="-280" y="-102">x:=0</label>
+		</transition>
+	</template>
+	<template>
+		<name>Agent</name>
+		<parameter>const pid_t id</parameter>
+		<declaration>
+
+clock y;</declaration>
+		<location id="id3" x="-323" y="-153">
+			<name x="-374" y="-187">Waiting</name>
+			<label kind="invariant" x="-425" y="-161">y &lt;= 5 and 
+reward' == 3</label>
+		</location>
+		<location id="id4" x="-119" y="-153">
+			<name x="-119" y="-187">Surveilling</name>
+			<label kind="invariant" x="-102" y="-162">cost' == 3 and
+reward' == 1 and
+y &lt;= 10</label>
+		</location>
+		<init ref="id3"/>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="select" x="-255" y="-119">e : id_t</label>
+			<label kind="guard" x="-255" y="-102">y &gt;= 5</label>
+			<label kind="synchronisation" x="-255" y="-85">surveil[e]!</label>
+			<label kind="assignment" x="-255" y="-136">y := 0</label>
+			<nail x="-161" y="-68"/>
+			<nail x="-280" y="-68"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="assignment" x="-238" y="-229">y:=0</label>
+			<nail x="-272" y="-229"/>
+			<nail x="-170" y="-229"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+// List one or more processes to be composed into a system.
+system Place, Agent;</system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
