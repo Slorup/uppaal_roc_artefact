@@ -1,5 +1,6 @@
 import os.path
 import re
+from collections import OrderedDict
 
 instance_to_ratio_dict: {str: float} = {
     "kim_cr": 33/10,
@@ -21,14 +22,14 @@ alg_to_plot_options_dict: {str: str} = {
 
 alg_to_table_name: {str: str} = {
     "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction",
-    "lambdadeduction_lp": "Symbolic $\lambda$\\nobreakdash-deduction without transformation matrices",
-    "lambdadeduction_clean_waiting": "Symbolic $\lambda$\\nobreakdash-deduction with waiting list cleanup",
+    "lambdadeduction_lp": "Symbolic $\lambda$\\nobreakdash-deduction - only lp",
+    "lambdadeduction_clean_waiting": "Symbolic $\lambda$\\nobreakdash-deduction - waiting cleanup",
     "concretemcr": "Concrete-MCR",
     "concretemcr_por": "Concrete-MCR + POR"
 }
 
 class InstanceResult:
-    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory, clean_waiting, no_transformation_matrix):
+    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory, clean_waiting, no_transformation_matrix, number_of_mcr_location_vectors):
         self.instance_name = instance_name
         self.ratios = ratios
         self.time_to_find_stored_optimal = time_to_find_optimal
@@ -46,6 +47,7 @@ class InstanceResult:
         self.memory = memory
         self.clean_waiting = clean_waiting
         self.no_transformation_matrix = no_transformation_matrix
+        self.number_of_mcr_location_vectors = number_of_mcr_location_vectors
 
     def get_value(self, category_str):
         match category_str:
@@ -73,6 +75,7 @@ def parse_result_data(result_folder):
                 howards_time = -1
                 por_time = -1
                 memory = -1
+                number_of_mcr_location_vectors = -1
                 out_of_memory = False
                 out_of_time = False
                 uses_cost_reward = True
@@ -126,6 +129,10 @@ def parse_result_data(result_folder):
                     if res:
                         out_of_memory = True
 
+                    res = re.match("Command terminated by signal 6", line)
+                    if res:
+                        out_of_memory = True
+
                     res = re.match("Timed Out", line)
                     if res:
                         out_of_time = True
@@ -137,6 +144,10 @@ def parse_result_data(result_folder):
                     res = re.match(r"Number of states: (\d+)", line)
                     if res:
                         mcr_states = res.group(1)
+
+                    res = re.match(r"Number of unique location vectors: (\d+)", line)
+                    if res:
+                        number_of_mcr_location_vectors = res.group(1)
 
                     res = re.match(r"Clean waiting list each iteration: (\d)", line)
                     if res:
@@ -162,12 +173,12 @@ def parse_result_data(result_folder):
                     if res:
                         memory = res.group(1)
 
-                res = re.match(".*scaling(\d+)", instance)
+                res = re.match(".*scaling(\d+)/", instance)
                 scaling_factor = -1
                 if res:
                     scaling_factor = res.group(1)
                 finished = not out_of_time and not out_of_memory
-                res = InstanceResult(instance_name, ratios, int(optimal_ratio_time), int(total_time), int(scaling_factor), finished, out_of_memory, out_of_time, uses_cost_reward, int(mcr_states), int(howards_time), int(por_time), int(mcr_reduction_time), int(lp_total_count), int(memory), clean_waiting_list, no_transformation_matrix)
+                res = InstanceResult(instance_name, ratios, int(optimal_ratio_time), int(total_time), int(scaling_factor), finished, out_of_memory, out_of_time, uses_cost_reward, int(mcr_states), int(howards_time), int(por_time), int(mcr_reduction_time), int(lp_total_count), int(memory), clean_waiting_list, no_transformation_matrix, int(number_of_mcr_location_vectors))
                 result_dict[alg_name].append(res)
         alg_progress += 1
     return result_dict
@@ -213,6 +224,36 @@ def latex_constant_scaling_plot(data: dict[str, list[InstanceResult]], output_na
             latex_plot_data += f"({scaling_instance.scaling_factor}, {scaling_instance.time_to_finish})\n"
         latex_plot_data += r"};" + "\n"
     output_latex_content(f"{output_name}.txt", latex_plot_legend + latex_plot_data)
+
+def latex_state_scaling_plot(data: dict[str, list[InstanceResult]], output_name):
+    res_data = filter_to_specific_algs(data, ["concretemcr", "lambdadeduction"])
+    res_data = prune_instances_not_on_all_algs(res_data)
+    sort_results_data(res_data)
+    mcr_instances = res_data["concretemcr"]
+    lambda_instances = res_data["lambdadeduction"]
+
+    points = []
+
+    # latex_plot_data = "\legend{" + alg_to_table_name["concretemcr"] + ", " + alg_to_table_name["lambdadeduction"] + "}\n"
+    latex_plot_data = "\\addplot[mark=*, mark options={solid}, color=red, thick] coordinates {\n"
+    for count in range(0, len(mcr_instances)):
+        mcr_instance = mcr_instances[count]
+        lambda_instance = lambda_instances[count]
+        mcr_states = mcr_instance.mcr_states
+        mcr_num_loc_vectors = mcr_instance.number_of_mcr_location_vectors
+        if not mcr_instance.finished and not lambda_instance.finished:
+            continue
+        elif not mcr_instance.finished:
+            points.append((mcr_states/mcr_num_loc_vectors, 10000))
+        elif not lambda_instance.finished:
+            points.append((mcr_states/mcr_num_loc_vectors, 0))
+        else:
+            points.append((mcr_states / mcr_num_loc_vectors, mcr_instance.time_to_finish / lambda_instance.time_to_finish))
+        count += 1
+    for (x_val, y_val) in sorted(points, key=lambda x: x[0]):
+        latex_plot_data += f"({x_val}, {y_val}) "
+    latex_plot_data += "\n};\n"
+    output_latex_content(f"{output_name}.txt", latex_plot_data)
 
 def latex_cactus_plot(data: dict[str, list[InstanceResult]], category, output_name):
     data = prune_instances_not_on_all_algs(data)
@@ -272,13 +313,13 @@ def prune_instances_not_on_all_algs(data: dict[str, list[InstanceResult]]) -> di
             result_data[alg] = remaining_instances
     return result_data
 
-def prune_instances_containing_str(data: dict[str, list[InstanceResult]], str: str) -> dict[str, list[InstanceResult]]:
+def prune_instances_containing_str(data: dict[str, list[InstanceResult]], str_list: list[str]) -> dict[str, list[InstanceResult]]:
     result_data: dict[str, list[InstanceResult]] = {}
 
     for alg, instances in data.items():
-        remaining_instances = [instance for instance in instances if str not in instance.instance_name]
+        remaining_instances = [instance for instance in instances if len([s for s in str_list if s in instance.instance_name]) == 0]
         if len(remaining_instances) > 0:
-            result_data[alg] =remaining_instances
+            result_data[alg] = remaining_instances
     return result_data
 
 def filter_instances_to_contain_str(data: dict[str, list[InstanceResult]], str: str) -> dict[str, list[InstanceResult]]:
@@ -310,7 +351,7 @@ def latex_data_structure_size_plot(result_file):
         latex_plot_data_passed += "};\n"
         output_latex_content("data_structure_size_data.txt", latex_plot_legend + latex_plot_data_waiting + latex_plot_data_passed)
 
-def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
+def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_order):
     alg_to_table_columns: {str: list[str]} = {
         "lambdadeduction": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_lp": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
@@ -332,6 +373,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
 
     data = prune_instances_not_on_all_algs(data)
     sort_results_data(data)
+    new_data = OrderedDict((k, data.get(k)) for k in alg_order)
 
     latex_table = r"\begin{tabular}{c"
     for alg in data.keys():
@@ -340,19 +382,19 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
             latex_table += "r"
     latex_table += "}\n"
 
-    for alg in data.keys():
+    for alg in new_data.keys():
         latex_table += "& \multicolumn{" + str(len(alg_to_table_columns[alg])) + "}{c}{" + alg_to_table_name[alg] + "} "
     latex_table += "\\\\\\hline\n"
 
     latex_table += "Instance"
 
-    for alg in data.keys():
+    for alg in new_data.keys():
         for column in alg_to_table_columns[alg]:
             latex_table += " & " + column_to_table_name[column]
     latex_table += "\\\\\\hline"
 
     instance_names: list[str] = []
-    for (alg, instance_results) in data.items():
+    for (alg, instance_results) in new_data.items():
         instance_names = [instance_result.instance_name for instance_result in instance_results]
         break
 
@@ -368,7 +410,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
         best_ratio_for_instance = 1000000
         best_ratiotime_for_instance = 1000000
 
-        for (alg, instance_results) in data.items():
+        for (alg, instance_results) in new_data.items():
             instance_result: InstanceResult = [instance_result for instance_result in instance_results if instance_result.instance_name == instance_name][0]
             for column in alg_to_table_columns[alg]:
                 instance_latex_table += " & "
@@ -465,6 +507,15 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name):
     output_latex_content(f"{output_name}.txt", latex_table)
 
 def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_name, category_name, output_name):
+    instance_type_to_mark_options = {
+        "general": "mark=+, color=black",
+        "strandvejen": "mark=square, color=black",
+        "surveil": "mark=o, color=black",
+        "job": "mark=triangle, color=black"
+    }
+
+    instance_type_to_points: dict[str, list[str]] = {}
+
     data = prune_instances_not_on_all_algs(data)
     sort_results_data(data)
 
@@ -472,8 +523,6 @@ def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_
     for (alg, instance_results) in data.items():
         instance_names = [instance_result.instance_name for instance_result in instance_results]
         break
-
-    latex_plot_data = "\\addplot+[only marks, mark=+, color=black] coordinates {\n"
 
     did_not_finish_value = 1000
     min_value = 0.001
@@ -496,8 +545,33 @@ def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_
                     y_alg_value = val if val >= min_value else min_value
             else:
                 continue
-        latex_plot_data += f"({x_alg_value}, {y_alg_value}) "
-    latex_plot_data += "\n};"
+        instance_type_name = instance_name.split("_")[0]
+        if instance_type_name not in instance_type_to_points.keys():
+            instance_type_to_points[instance_type_name] = []
+        instance_type_to_points[instance_type_name].append(f"({x_alg_value}, {y_alg_value})")
+        # latex_plot_data += f"({x_alg_value}, {y_alg_value}) "
+    # latex_plot_data += "\n};"
+
+    general_latex_plot_data = "\\addplot+[only marks, " + instance_type_to_mark_options["general"] + "] coordinates {\n"
+    non_special_instance_found = False
+    special_instances_plot_data = ""
+    for instance_type_name, points in instance_type_to_points.items():
+        if len(points) == 0:
+            continue
+
+        if instance_type_name in instance_type_to_mark_options.keys():
+            instance_type_data = "\\addplot+[only marks, " + instance_type_to_mark_options[instance_type_name] + "] coordinates {\n"
+            for point in points:
+                instance_type_data += point + " "
+            instance_type_data += "};\n"
+            special_instances_plot_data += instance_type_data
+        else:
+            for point in points:
+                general_latex_plot_data += point + " "
+            non_special_instance_found = True
+    general_latex_plot_data += "\n};\n"
+
+    latex_plot_data = special_instances_plot_data + (general_latex_plot_data if non_special_instance_found else "")
     output_latex_content(f"{output_name}.txt", latex_plot_data)
 
 def filter_to_specific_algs(data: dict[str, list[InstanceResult]], algs: list[str]) -> dict[str, list[InstanceResult]]:
@@ -507,12 +581,15 @@ def filter_to_specific_algs(data: dict[str, list[InstanceResult]], algs: list[st
             result_data[alg] = instances
     return result_data
 
+
+
 os.chdir("../results")
 result_data = parse_result_data(os.getcwd())
-# result_data = prune_instances_containing_str(result_data, "plus1")
-# result_data = filter_instances_to_contain_str(result_data, "surveil")
-result_data = prune_instances_containing_str(result_data, "scaling")
-result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_lp"])
+# result_data = filter_instances_to_contain_str(result_data, "-")
+result_data = filter_instances_to_contain_str(result_data, "scaling")
+# result_data = prune_instances_containing_str(result_data, "job")
+result_data = filter_to_specific_algs(result_data, ["concretemcr"])
+# result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
 # result_data = prune_instances_not_on_all_algs(result_data)
 
 os.chdir("../")
@@ -521,8 +598,9 @@ if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
 
 # latex_cactus_plot(result_data, "Time", "cactus_time_data")
-# latex_scatter_plot(result_data, "lambdadeduction", "lambdadeduction_lp", "Time", "scatter_plot_time_data")
-# latex_big_table(result_data, "big_table_data")
+# latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
+# latex_state_scaling_plot(result_data, "scaling_ratio_plot_data")
+# latex_big_table(result_data, "test_table_data", ["concretemcr", "lambdadeduction"])
 # latex_data_structure_size_plot(os.getcwd() + "/results/lambdadeduction/strandvejen_test_f2_v1_c1.txt")
-# latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
+latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
 #latex_ratio_step_plots_all_instances(result_data)

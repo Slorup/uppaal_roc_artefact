@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "lambdadeduction_lp" "lambdadeduction_clean_waiting")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "lambdadeduction_no_optimisations" "lambdadeduction_transformation_matrix" "lambdadeduction_prune_parent" "lambdadeduction_reuse_waiting")
 
 if (( $# < 5 ))
 then

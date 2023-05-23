@@ -20,16 +20,20 @@ declare -A algToGitBranchName
 algToGitBranchName["concretemcr"]="concretemcr"
 algToGitBranchName["concretemcr_por"]="concretemcr_por"
 algToGitBranchName["lambdadeduction"]="lambdadeduction"
-algToGitBranchName["lambdadeduction_lp"]="lambdadeduction"
-algToGitBranchName["lambdadeduction_clean_waiting"]="lambdadeduction"
+algToGitBranchName["lambdadeduction_no_optimisations"]="lambdadeduction"
+algToGitBranchName["lambdadeduction_transformation_matrix"]="lambdadeduction"
+algToGitBranchName["lambdadeduction_prune_parent"]="lambdadeduction"
+algToGitBranchName["lambdadeduction_reuse_waiting"]="lambdadeduction"
 algToGitBranchName["bdd"]="bdd"
 
 declare -A algToVerifytaOptions
 algToVerifytaOptions["concretemcr"]="--roc-alg=0 --ratio-type=1"
 algToVerifytaOptions["concretemcr_por"]="--roc-alg=0 --ratio-type=1"
 algToVerifytaOptions["lambdadeduction"]="--roc-alg=5 --ratio-type=1"
-algToVerifytaOptions["lambdadeduction_lp"]="--roc-alg=5 --ratio-type=1 --no-transformation-matrix"
-algToVerifytaOptions["lambdadeduction_clean_waiting"]="--roc-alg=5 --ratio-type=1 --clean-waiting"
+algToVerifytaOptions["lambdadeduction_no_optimisations"]="--roc-alg=5 --ratio-type=1 --no-transformation-matrix --clean-waiting --no-parent-pruning"
+algToVerifytaOptions["lambdadeduction_transformation_matrix"]="--roc-alg=5 --ratio-type=1 --clean-waiting --no-parent-pruning"
+algToVerifytaOptions["lambdadeduction_prune_parent"]="--roc-alg=5 --ratio-type=1 --clean-waiting --no-transformation-matrix"
+algToVerifytaOptions["lambdadeduction_reuse_waiting"]="--roc-alg=5 --ratio-type=1 --no-parent-pruning --no-transformation-matrix"
 algToVerifytaOptions["bdd"]="--roc-alg=5 --ratio-type=1"
 
 cd "$ARTEFACT_DIR" || exit

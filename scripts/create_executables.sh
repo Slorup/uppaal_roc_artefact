@@ -8,9 +8,9 @@ EXECUTABLE_DIR="${ARTEFACT_DIR}/executables"
 mkdir -p $EXECUTABLE_DIR
 
 declare -A algToGitCommit
-algToGitCommit["concretemcr"]="410de2d"
+algToGitCommit["concretemcr"]="0c28d89"
 algToGitCommit["concretemcr_por"]="25f60b7"
-algToGitCommit["lambdadeduction"]="4fa1a9a"
+algToGitCommit["lambdadeduction"]="f3577bd"
 algToGitCommit["bdd"]="529b66a"
 
 declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
