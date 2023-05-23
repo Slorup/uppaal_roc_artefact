@@ -35,7 +35,7 @@ algToVerifytaOptions["bdd"]="--roc-alg=5 --ratio-type=1"
 cd "$ARTEFACT_DIR" || exit
 mkdir -p results/"${ALG}"
 
-for INSTANCE in "$ARTEFACT_DIR"/models/testing/*${FILTER}*.xml* ; do
+for INSTANCE in "$ARTEFACT_DIR"/models/*${FILTER}*.xml* ; do
   [[ -e "$INSTANCE" ]] || break
   if [ $count -le "$MAX_INSTANCES_TO_RUN" ]
   then

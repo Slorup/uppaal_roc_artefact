@@ -1,9 +1,8 @@
 #!/bin/bash
-#SBATCH --time=1:00:00
 #SBATCH --mail-user=nsjo18@student.aau.dk
 #SBATCH --mail-type=FAIL
 #SBATCH --partition=naples
-#SBATCH --mem=5G
+#SBATCH --mem=10G
 #SBATCH --cpus-per-task=1
 
 declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "lambdadeduction_no_optimisations" "lambdadeduction_transformation_matrix" "lambdadeduction_prune_parent" "lambdadeduction_reuse_waiting")
@@ -34,11 +33,11 @@ cd "$SCRIPT_DIR" || exit
 
 for ALG in "${ALGS_TO_RUN[@]}" ; do
   count=0
-  for INSTANCE in $ARTEFACT_DIR/models/*${FILTER}*.xml* ; do
+  for INSTANCE in $ARTEFACT_DIR/models/benchmark/*${FILTER}*.xml* ; do
     [[ -e "$INSTANCE" ]] || break
     if [ $count -le "$MAX_INSTANCES" ]
     then
-      ./run_instance.sh "$ALG" "$TIMEOUT_SECONDS" "$INSTANCE" "$EXECUTABLE_FOLDER" "$ARTEFACT_DIR"
+      sbatch ./run_instance.sh "$ALG" "$TIMEOUT_SECONDS" "$INSTANCE" "$EXECUTABLE_FOLDER" "$ARTEFACT_DIR"
     fi
     (( count++ ))
   done

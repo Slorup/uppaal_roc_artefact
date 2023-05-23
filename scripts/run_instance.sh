@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --time=1:00:00
+#SBATCH --time=0:05:00
 #SBATCH --mail-user=nsjo18@student.aau.dk
 #SBATCH --mail-type=FAIL
 #SBATCH --error=/nfs/home/student.aau.dk/nsjo18/slurm-output/run-tool-%j.err
 #SBATCH --partition=naples
-#SBATCH --mem=5G
+#SBATCH --mem=10G
 #SBATCH --cpus-per-task=1
 
-let "m=1000*1000*5"
+let "m=1000*1000*10"
 ulimit -v $m
 
 ALG="${1}"
