@@ -2,7 +2,8 @@
 #SBATCH --time=0:05:00
 #SBATCH --mail-user=nsjo18@student.aau.dk
 #SBATCH --mail-type=FAIL
-#SBATCH --error=/nfs/home/student.aau.dk/nsjo18/slurm-output/run-tool-%j.err
+#SBATCH --error=/nfs/home/student.aau.dk/nsjo18/uppaal_roc_artefact/slurm-output/run-instance-%j.err
+#SBATCH --output=/nfs/home/student.aau.dk/nsjo18/uppaal_roc_artefact/slurm-output/setup-venv-%j.out
 #SBATCH --partition=naples
 #SBATCH --mem=10G
 #SBATCH --cpus-per-task=1
@@ -15,6 +16,7 @@ TIME_LIMIT="${2}"
 INSTANCE="${3}"
 EXECUTABLE_DIR="${4}"
 ARTEFACT_DIR="${5}"
+KEY="${6}"
 
 declare -A algToGitBranchName
 algToGitBranchName["concretemcr"]="concretemcr"
@@ -44,7 +46,7 @@ filename="${filename%.*}"
 RESULT_FILE="$ARTEFACT_DIR/results/${ALG}/$filename.txt"
 [ -f "$RESULT_FILE" ] && rm "$RESULT_FILE"
 echo Running "$filename" on "$ALG" ..
-/usr/bin/time -f "@@@%e,%M@@@" timeout "$TIME_LIMIT" "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/verifyta" "$INSTANCE" ${algToVerifytaOptions["${ALG}"]} &> "$RESULT_FILE"
+/usr/bin/time -f "@@@%e,%M@@@" timeout "$TIME_LIMIT" "${EXECUTABLE_DIR}/${algToGitBranchName["${ALG}"]}/verifyta" "--key=$KEY" "$INSTANCE" ${algToVerifytaOptions["${ALG}"]} &> "$RESULT_FILE"
 exit_status=$?
 if [[ $exit_status -eq 124 ]]; then
 	echo "Timed Out" >> "$RESULT_FILE"

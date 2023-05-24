@@ -19,12 +19,13 @@ FILTER="$1"
 EXECUTABLE_FOLDER="$2"
 TIMEOUT_SECONDS="$3"
 MAX_INSTANCES="$4"
-count=0
+KEY="$5"
+count=1
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ARTEFACT_DIR="$(dirname "$SCRIPT_DIR")"
 
-if [ "$5" != "all" ]
+if [ "$6" != "all" ]
 then
   ALGS_TO_RUN=("${@:5}")
 fi
@@ -32,12 +33,12 @@ fi
 cd "$SCRIPT_DIR" || exit
 
 for ALG in "${ALGS_TO_RUN[@]}" ; do
-  count=0
-  for INSTANCE in $ARTEFACT_DIR/models/benchmark/*${FILTER}*.xml* ; do
+  count=1
+  for INSTANCE in $ARTEFACT_DIR/models/benchmark/${FILTER}* ; do
     [[ -e "$INSTANCE" ]] || break
     if [ $count -le "$MAX_INSTANCES" ]
     then
-      sbatch ./run_instance.sh "$ALG" "$TIMEOUT_SECONDS" "$INSTANCE" "$EXECUTABLE_FOLDER" "$ARTEFACT_DIR"
+      sbatch ./run_instance.sh "$ALG" "$TIMEOUT_SECONDS" "$INSTANCE" "$EXECUTABLE_FOLDER" "$ARTEFACT_DIR" "$KEY"
     fi
     (( count++ ))
   done

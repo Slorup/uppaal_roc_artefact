@@ -16,14 +16,18 @@ alg_to_plot_options_dict: {str: str} = {
     "concretemcr": "color=red, loosely dashed, thick",
     "concretemcr_por": "color=green, thick",
     "lambdadeduction": "color=blue, dashed, thick",
-    "lambdadeduction_lp": "color=purple, thick",
-    "lambdadeduction_clean_waiting": "color=green, dotted"
+    "lambdadeduction_no_optimisations": "color=blue, dashed, thick",
+    "lambdadeduction_prune_parent": "color=purple, thick",
+    "lambdadeduction_reuse_waiting": "color=green, dotted",
+    "lambdadeduction_transformation_matrix": "color=green, dotted"
 }
 
 alg_to_table_name: {str: str} = {
     "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction",
-    "lambdadeduction_lp": "Symbolic $\lambda$\\nobreakdash-deduction - only lp",
-    "lambdadeduction_clean_waiting": "Symbolic $\lambda$\\nobreakdash-deduction - waiting cleanup",
+    "lambdadeduction_no_optimisations": "Symbolic $\lambda$\\nobreakdash-deduction - No opt.",
+    "lambdadeduction_prune_parent": "Symbolic $\lambda$\\nobreakdash-deduction - Parent Pruning",
+    "lambdadeduction_reuse_waiting": "Symbolic $\lambda$\\nobreakdash-deduction - Reuse Waiting",
+    "lambdadeduction_transformation_matrix": "Symbolic $\lambda$\\nobreakdash-deduction - Matrices",
     "concretemcr": "Concrete-MCR",
     "concretemcr_por": "Concrete-MCR + POR"
 }
