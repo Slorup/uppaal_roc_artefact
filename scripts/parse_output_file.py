@@ -13,13 +13,13 @@ instance_to_ratio_dict: {str: float} = {
 }
 
 alg_to_plot_options_dict: {str: str} = {
-    "concretemcr": "color=red, loosely dashed, thick",
+    "concretemcr": "color=blue, loosely dashed, thick",
     "concretemcr_por": "color=green, thick",
-    "lambdadeduction": "color=blue, dashed, thick",
-    "lambdadeduction_no_optimisations": "color=blue, dashed, thick",
-    "lambdadeduction_prune_parent": "color=purple, thick",
-    "lambdadeduction_reuse_waiting": "color=green, dotted",
-    "lambdadeduction_transformation_matrix": "color=green, dotted"
+    "lambdadeduction": "color=red, dashed, thick",
+    "lambdadeduction_no_optimisations": "color=blue, loosely dashed, thick",
+    "lambdadeduction_prune_parent": "color=gray, densely dotted, thick",
+    "lambdadeduction_reuse_waiting": "color=green, dotted, thick",
+    "lambdadeduction_transformation_matrix": "color=black, dash dot, thick"
 }
 
 alg_to_table_name: {str: str} = {
@@ -260,7 +260,7 @@ def latex_state_scaling_plot(data: dict[str, list[InstanceResult]], output_name)
     output_latex_content(f"{output_name}.txt", latex_plot_data)
 
 def latex_cactus_plot(data: dict[str, list[InstanceResult]], category, output_name):
-    data = prune_instances_not_on_all_algs(data)
+    data = prune_instances_not_on_all_algs(data, False)
     sort_results_data(data)
 
     instance_count = 0
@@ -274,12 +274,13 @@ def latex_cactus_plot(data: dict[str, list[InstanceResult]], category, output_na
         latex_plot_data += alg_to_table_name[alg] + ", "
     latex_plot_data += "}\n% Number of instances: " + str(instance_count) + "\n"
 
-    did_not_finish_replacement_val = 1000
     min_value = 0.001
     for alg, instance_results in data.items():
         latex_plot_data += "\\addplot[mark=none, " + f"{alg_to_plot_options_dict[alg]}" + "] coordinates {\n"
         count = 0
         for instance_result in sorted(instance_results, key=lambda x: x.get_value(category)):
+            if not instance_result.finished:
+                continue
             val = instance_result.get_value(category)
             if val == -1:
                 continue
@@ -298,16 +299,22 @@ def sort_results_data(results_data: dict[str, list[InstanceResult]]):
     for alg, instances in results_data.items():
         results_data[alg] = sorted(instances, key=lambda x: x.instance_name)
 
-def prune_instances_not_on_all_algs(data: dict[str, list[InstanceResult]]) -> dict[str, list[InstanceResult]]:
+def prune_instances_not_on_all_algs(data: dict[str, list[InstanceResult]], also_prune_non_finished_instances: bool) -> dict[str, list[InstanceResult]]:
     result_data: dict[str, list[InstanceResult]] = {}
 
     common_instances_names = {}
     count = 0
     for alg, instances in data.items():
         if count == 0:
-            common_instances_names = set([instance.instance_name for instance in instances])
+            if also_prune_non_finished_instances:
+                common_instances_names = set([instance.instance_name for instance in instances if instance.finished])
+            else:
+                common_instances_names = set([instance.instance_name for instance in instances])
         else:
-            new_instance_names = set([instance.instance_name for instance in instances])
+            if also_prune_non_finished_instances:
+                new_instance_names = set([instance.instance_name for instance in instances if instance.finished])
+            else:
+                new_instance_names = set([instance.instance_name for instance in instances])
             common_instances_names = common_instances_names.intersection(new_instance_names)
         count += 1
 
@@ -358,8 +365,10 @@ def latex_data_structure_size_plot(result_file):
 def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_order):
     alg_to_table_columns: {str: list[str]} = {
         "lambdadeduction": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
-        "lambdadeduction_lp": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
-        "lambdadeduction_clean_waiting": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_no_optimisations": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_reuse_waiting": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_prune_parent": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_transformation_matrix": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "concretemcr": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "concretemcr_por": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"]
     }
@@ -375,7 +384,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_orde
         "BestRatioTime": "RatioTime (s)"
     }
 
-    data = prune_instances_not_on_all_algs(data)
+    data = prune_instances_not_on_all_algs(data, False)
     sort_results_data(data)
     new_data = OrderedDict((k, data.get(k)) for k in alg_order)
 
@@ -520,7 +529,7 @@ def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_
 
     instance_type_to_points: dict[str, list[str]] = {}
 
-    data = prune_instances_not_on_all_algs(data)
+    data = prune_instances_not_on_all_algs(data, False)
     sort_results_data(data)
 
     instance_names: list[str] = []
@@ -589,22 +598,30 @@ def filter_to_specific_algs(data: dict[str, list[InstanceResult]], algs: list[st
 
 os.chdir("../results")
 result_data = parse_result_data(os.getcwd())
+
 # result_data = filter_instances_to_contain_str(result_data, "-")
-result_data = filter_instances_to_contain_str(result_data, "scaling")
+# result_data = filter_instances_to_contain_str(result_data, "scaling")
 # result_data = prune_instances_containing_str(result_data, "job")
-result_data = filter_to_specific_algs(result_data, ["concretemcr"])
 # result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
-# result_data = prune_instances_not_on_all_algs(result_data)
+
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
+result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "concretemcr"])
+# result_data = prune_instances_not_on_all_algs(result_data, True)
 
 os.chdir("../")
 latex_dir = os.path.join(os.getcwd(), f"latex")
 if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
-
+#
+# latex_cactus_plot(result_data, "Memory", "cactus_memory_lambda_data")
+# latex_cactus_plot(result_data, "Time", "cactus_time_lambda_data")
 # latex_cactus_plot(result_data, "Time", "cactus_time_data")
-# latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
+latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
 # latex_state_scaling_plot(result_data, "scaling_ratio_plot_data")
 # latex_big_table(result_data, "test_table_data", ["concretemcr", "lambdadeduction"])
+# latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
+# latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
 # latex_data_structure_size_plot(os.getcwd() + "/results/lambdadeduction/strandvejen_test_f2_v1_c1.txt")
-latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
+# latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
 #latex_ratio_step_plots_all_instances(result_data)
