@@ -1,6 +1,4 @@
 #!/bin/bash
-#SBATCH --mail-user=nsjo18@student.aau.dk
-#SBATCH --mail-type=FAIL
 #SBATCH --partition=naples
 #SBATCH --mem=10G
 #SBATCH --cpus-per-task=1

@@ -1,7 +1,5 @@
 #!/bin/bash
 #SBATCH --time=0:05:00
-#SBATCH --mail-user=nsjo18@student.aau.dk
-#SBATCH --mail-type=FAIL
 #SBATCH --error=/nfs/home/student.aau.dk/nsjo18/uppaal_roc_artefact/slurm-output/run-instance-%j.err
 #SBATCH --output=/nfs/home/student.aau.dk/nsjo18/uppaal_roc_artefact/slurm-output/setup-venv-%j.out
 #SBATCH --partition=naples
