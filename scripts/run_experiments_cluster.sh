@@ -27,7 +27,7 @@ ARTEFACT_DIR="$(dirname "$SCRIPT_DIR")"
 
 if [ "$6" != "all" ]
 then
-  ALGS_TO_RUN=("${@:5}")
+  ALGS_TO_RUN=("${@:6}")
 fi
 
 cd "$SCRIPT_DIR" || exit

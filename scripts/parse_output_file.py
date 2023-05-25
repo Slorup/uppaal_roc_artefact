@@ -23,7 +23,7 @@ alg_to_plot_options_dict: {str: str} = {
 }
 
 alg_to_table_name: {str: str} = {
-    "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction",
+    "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction - All opt.",
     "lambdadeduction_no_optimisations": "Symbolic $\lambda$\\nobreakdash-deduction - No opt.",
     "lambdadeduction_prune_parent": "Symbolic $\lambda$\\nobreakdash-deduction - Parent Pruning",
     "lambdadeduction_reuse_waiting": "Symbolic $\lambda$\\nobreakdash-deduction - Reuse Waiting",
@@ -617,10 +617,10 @@ if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
 # latex_cactus_plot(result_data, "Memory", "cactus_memory_lambda_data")
 # latex_cactus_plot(result_data, "Time", "cactus_time_lambda_data")
 # latex_cactus_plot(result_data, "Time", "cactus_time_data")
-latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
+# latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
 # latex_state_scaling_plot(result_data, "scaling_ratio_plot_data")
 # latex_big_table(result_data, "test_table_data", ["concretemcr", "lambdadeduction"])
-# latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
+latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
 # latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
 # latex_data_structure_size_plot(os.getcwd() + "/results/lambdadeduction/strandvejen_test_f2_v1_c1.txt")
 # latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
