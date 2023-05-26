@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --time=0:05:00
+#SBATCH --time=0:30:00
 #SBATCH --error=/nfs/home/student.aau.dk/nsjo18/uppaal_roc_artefact/slurm-output/run-instance-%j.err
 #SBATCH --output=/nfs/home/student.aau.dk/nsjo18/uppaal_roc_artefact/slurm-output/setup-venv-%j.out
 #SBATCH --partition=naples
 #SBATCH --mem=10G
 #SBATCH --cpus-per-task=1
 
-let "m=1000*1000*10"
+let "m=1024*1024*10"
 ulimit -v $m
 
 ALG="${1}"
@@ -24,6 +24,7 @@ algToGitBranchName["lambdadeduction_no_optimisations"]="lambdadeduction"
 algToGitBranchName["lambdadeduction_transformation_matrix"]="lambdadeduction"
 algToGitBranchName["lambdadeduction_prune_parent"]="lambdadeduction"
 algToGitBranchName["lambdadeduction_reuse_waiting"]="lambdadeduction"
+algToGitBranchName["lambdadeduction_full_reset_cost"]="lambdadeduction"
 algToGitBranchName["bdd"]="bdd"
 
 declare -A algToVerifytaOptions
@@ -34,6 +35,7 @@ algToVerifytaOptions["lambdadeduction_no_optimisations"]="--roc-alg=5 --ratio-ty
 algToVerifytaOptions["lambdadeduction_transformation_matrix"]="--roc-alg=5 --ratio-type=1 --clean-waiting --no-parent-pruning"
 algToVerifytaOptions["lambdadeduction_prune_parent"]="--roc-alg=5 --ratio-type=1 --clean-waiting --no-transformation-matrix"
 algToVerifytaOptions["lambdadeduction_reuse_waiting"]="--roc-alg=5 --ratio-type=1 --no-parent-pruning --no-transformation-matrix"
+algToVerifytaOptions["lambdadeduction_full_reset_cost"]="--roc-alg=5 --ratio-type=1 --reset-cost-on-lambda-improvement"
 algToVerifytaOptions["bdd"]="--roc-alg=5 --ratio-type=1"
 
 cd "$ARTEFACT_DIR" || exit

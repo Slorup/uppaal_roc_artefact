@@ -3,7 +3,7 @@
 #SBATCH --mem=10G
 #SBATCH --cpus-per-task=1
 
-declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "lambdadeduction_no_optimisations" "lambdadeduction_transformation_matrix" "lambdadeduction_prune_parent" "lambdadeduction_reuse_waiting")
+declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "lambdadeduction_no_optimisations" "lambdadeduction_transformation_matrix" "lambdadeduction_prune_parent" "lambdadeduction_reuse_waiting" "lambdadeduction_full_reset_cost")
 
 if (( $# < 5 ))
 then

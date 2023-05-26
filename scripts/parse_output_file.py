@@ -19,7 +19,8 @@ alg_to_plot_options_dict: {str: str} = {
     "lambdadeduction_no_optimisations": "color=blue, loosely dashed, thick",
     "lambdadeduction_prune_parent": "color=gray, densely dotted, thick",
     "lambdadeduction_reuse_waiting": "color=green, dotted, thick",
-    "lambdadeduction_transformation_matrix": "color=black, dash dot, thick"
+    "lambdadeduction_transformation_matrix": "color=black, dash dot, thick",
+    "lambdadeduction_full_reset_cost": "color=magenta, thick"
 }
 
 alg_to_table_name: {str: str} = {
@@ -28,12 +29,13 @@ alg_to_table_name: {str: str} = {
     "lambdadeduction_prune_parent": "Symbolic $\lambda$\\nobreakdash-deduction - Parent Pruning",
     "lambdadeduction_reuse_waiting": "Symbolic $\lambda$\\nobreakdash-deduction - Reuse Waiting",
     "lambdadeduction_transformation_matrix": "Symbolic $\lambda$\\nobreakdash-deduction - Matrices",
+    "lambdadeduction_full_reset_cost": "Symbolic $\lambda$\\nobreakdash-deduction - All opt. + cost reset",
     "concretemcr": "Concrete-MCR",
     "concretemcr_por": "Concrete-MCR + POR"
 }
 
 class InstanceResult:
-    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory, clean_waiting, no_transformation_matrix, number_of_mcr_location_vectors):
+    def __init__(self, instance_name, ratios, time_to_find_optimal, time_to_finish, scaling_factor, finished, out_of_memory, out_of_time, uses_cost_reward, mcr_states, howards_time, por_time, mcr_reduction_time, total_lp_count, memory_script, time_script, clean_waiting, no_transformation_matrix, number_of_mcr_location_vectors):
         self.instance_name = instance_name
         self.ratios = ratios
         self.time_to_find_stored_optimal = time_to_find_optimal
@@ -48,7 +50,8 @@ class InstanceResult:
         self.por_time = por_time
         self.mcr_reduction_time = mcr_reduction_time
         self.total_lp_count = total_lp_count
-        self.memory = memory
+        self.memory_script = memory_script
+        self.time_script = time_script
         self.clean_waiting = clean_waiting
         self.no_transformation_matrix = no_transformation_matrix
         self.number_of_mcr_location_vectors = number_of_mcr_location_vectors
@@ -58,9 +61,9 @@ class InstanceResult:
             case "Time":
                 return self.time_to_finish / 1000 if self.time_to_finish != -1 else -1
             case "Memory":
-                return self.memory / 1000 if self.memory != -1 else -1
+                return self.memory_script / 1000 if self.memory_script != -1 else -1
 
-def parse_result_data(result_folder):
+def parse_result_data(result_folder, time_limit_seconds, memory_limit_mb):
     result_dict: dict[str, list[InstanceResult]] = {}
     alg_progress = 1
 
@@ -78,7 +81,8 @@ def parse_result_data(result_folder):
                 mcr_reduction_time = -1
                 howards_time = -1
                 por_time = -1
-                memory = -1
+                memory_script = -1
+                time_script = -1
                 number_of_mcr_location_vectors = -1
                 out_of_memory = False
                 out_of_time = False
@@ -141,6 +145,17 @@ def parse_result_data(result_folder):
                     if res:
                         out_of_time = True
 
+                    res = re.match(r"@@@(\d+).?(\d+),(\d+)@@@", line)
+                    if res:
+                        t = float(res.group(1)) + float(f"0.{res.group(2)}")
+                        m = int(res.group(3))
+                        time_script = t
+                        memory_script = m
+                        if t >= time_limit_seconds:
+                            out_of_time = True
+                        if m/1000 >= memory_limit_mb:
+                            out_of_memory = True
+
                     res = re.match("Ratio type: Cost/Time", line)
                     if res:
                         uses_cost_reward = False
@@ -173,16 +188,12 @@ def parse_result_data(result_folder):
                     if res:
                         mcr_reduction_time = res.group(1)
 
-                    res = re.match(r"@@@\d+.?\d+,(\d+)@@@", line)
-                    if res:
-                        memory = res.group(1)
-
                 res = re.match(".*scaling(\d+)/", instance)
                 scaling_factor = -1
                 if res:
                     scaling_factor = res.group(1)
                 finished = not out_of_time and not out_of_memory
-                res = InstanceResult(instance_name, ratios, int(optimal_ratio_time), int(total_time), int(scaling_factor), finished, out_of_memory, out_of_time, uses_cost_reward, int(mcr_states), int(howards_time), int(por_time), int(mcr_reduction_time), int(lp_total_count), int(memory), clean_waiting_list, no_transformation_matrix, int(number_of_mcr_location_vectors))
+                res = InstanceResult(instance_name, ratios, int(optimal_ratio_time), int(total_time), int(scaling_factor), finished, out_of_memory, out_of_time, uses_cost_reward, int(mcr_states), int(howards_time), int(por_time), int(mcr_reduction_time), int(lp_total_count), int(memory_script), int(time_script), clean_waiting_list, no_transformation_matrix, int(number_of_mcr_location_vectors))
                 result_dict[alg_name].append(res)
         alg_progress += 1
     return result_dict
@@ -231,7 +242,7 @@ def latex_constant_scaling_plot(data: dict[str, list[InstanceResult]], output_na
 
 def latex_state_scaling_plot(data: dict[str, list[InstanceResult]], output_name):
     res_data = filter_to_specific_algs(data, ["concretemcr", "lambdadeduction"])
-    res_data = prune_instances_not_on_all_algs(res_data)
+    res_data = prune_instances_not_on_all_algs(res_data, False)
     sort_results_data(res_data)
     mcr_instances = res_data["concretemcr"]
     lambda_instances = res_data["lambdadeduction"]
@@ -369,6 +380,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_orde
         "lambdadeduction_reuse_waiting": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_prune_parent": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_transformation_matrix": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_full_reset_cost": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "concretemcr": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "concretemcr_por": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"]
     }
@@ -446,7 +458,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_orde
                         if instance_result.out_of_memory:
                             instance_latex_table += "OOM"
                         elif instance_result.finished:
-                            memory = (instance_result.memory / 1000)
+                            memory = (instance_result.memory_script / 1000)
                             if memory < best_memory_for_instance:
                                 instance_latex_table = instance_latex_table.replace("-bestmemory-", "")
                                 instance_latex_table += "-bestmemory-"
@@ -537,7 +549,7 @@ def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_
         instance_names = [instance_result.instance_name for instance_result in instance_results]
         break
 
-    did_not_finish_value = 1000
+    did_not_finish_value = 5000
     min_value = 0.001
     for instance_name in instance_names:
         x_alg_value = -1
@@ -597,31 +609,33 @@ def filter_to_specific_algs(data: dict[str, list[InstanceResult]], algs: list[st
 
 
 os.chdir("../results")
-result_data = parse_result_data(os.getcwd())
-
-# result_data = filter_instances_to_contain_str(result_data, "-")
-# result_data = filter_instances_to_contain_str(result_data, "scaling")
-# result_data = prune_instances_containing_str(result_data, "job")
-# result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
-
-# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
-# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
-result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "concretemcr"])
-# result_data = prune_instances_not_on_all_algs(result_data, True)
+result_data = parse_result_data(os.getcwd(), 1800, 10000)
 
 os.chdir("../")
 latex_dir = os.path.join(os.getcwd(), f"latex")
 if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
-#
+
+# result_data = filter_instances_to_contain_str(result_data, "-")
+# result_data = filter_instances_to_contain_str(result_data, "scaling")
+# result_data = prune_instances_containing_str(result_data, "job")
+# result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
+# result_data = prune_instances_not_on_all_algs(result_data, True)
+
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
 # latex_cactus_plot(result_data, "Memory", "cactus_memory_lambda_data")
 # latex_cactus_plot(result_data, "Time", "cactus_time_lambda_data")
+# latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
+
+result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
+latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
+
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "concretemcr"])
 # latex_cactus_plot(result_data, "Time", "cactus_time_data")
 # latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
+# latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
+
 # latex_state_scaling_plot(result_data, "scaling_ratio_plot_data")
-# latex_big_table(result_data, "test_table_data", ["concretemcr", "lambdadeduction"])
-latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
-# latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
-# latex_data_structure_size_plot(os.getcwd() + "/results/lambdadeduction/strandvejen_test_f2_v1_c1.txt")
 # latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
+
 #latex_ratio_step_plots_all_instances(result_data)
