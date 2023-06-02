@@ -25,6 +25,7 @@ algToGitBranchName["lambdadeduction_transformation_matrix"]="lambdadeduction"
 algToGitBranchName["lambdadeduction_prune_parent"]="lambdadeduction"
 algToGitBranchName["lambdadeduction_reuse_waiting"]="lambdadeduction"
 algToGitBranchName["lambdadeduction_full_reset_cost"]="lambdadeduction"
+algToGitBranchName["lambdadeduction_keep_parent"]="lambdadeduction"
 algToGitBranchName["bdd"]="bdd"
 
 declare -A algToVerifytaOptions
@@ -36,6 +37,7 @@ algToVerifytaOptions["lambdadeduction_transformation_matrix"]="--roc-alg=5 --rat
 algToVerifytaOptions["lambdadeduction_prune_parent"]="--roc-alg=5 --ratio-type=1 --clean-waiting --no-transformation-matrix"
 algToVerifytaOptions["lambdadeduction_reuse_waiting"]="--roc-alg=5 --ratio-type=1 --no-parent-pruning --no-transformation-matrix"
 algToVerifytaOptions["lambdadeduction_full_reset_cost"]="--roc-alg=5 --ratio-type=1 --reset-cost-on-lambda-improvement"
+algToVerifytaOptions["lambdadeduction_keep_parent"]="--roc-alg=5 --ratio-type=1 --keep-parent"
 algToVerifytaOptions["bdd"]="--roc-alg=5 --ratio-type=1"
 
 cd "$ARTEFACT_DIR" || exit

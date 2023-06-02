@@ -606,6 +606,53 @@ def filter_to_specific_algs(data: dict[str, list[InstanceResult]], algs: list[st
             result_data[alg] = instances
     return result_data
 
+def calc_median_values(data: dict[str, list[InstanceResult]], alg1: str, alg2: str, category: str, output_name: str):
+    data = prune_instances_not_on_all_algs(data, False)
+    sort_results_data(data)
+
+    instance_names: list[str] = []
+    for (alg, instance_results) in data.items():
+        instance_names = [instance_result.instance_name for instance_result in instance_results]
+        break
+
+    points = []
+    for instance_name in instance_names:
+        alg1_val = -1
+        alg2_val = -1
+        for (alg, instance_results) in data.items():
+            instance_result: InstanceResult = [instance_result for instance_result in instance_results if instance_result.instance_name == instance_name][0]
+            if alg == alg1:
+                val = instance_result.get_value(category)
+                if instance_result.finished:
+                    alg1_val = val
+            elif alg == alg2:
+                val = instance_result.get_value(category)
+                if instance_result.finished:
+                    alg2_val = val
+            else:
+                continue
+        if alg1_val == -1 and alg2_val == -1:
+            continue
+        elif alg1_val == -1:
+            points.append(-10000)
+        elif alg2_val == -1:
+            points.append(10000)
+        else:
+            if alg1_val == 0:
+                alg1_val = 0.001
+            if alg2_val == 0:
+                alg2_val = 0.001
+            points.append(float(alg2_val - alg1_val)/alg1_val)
+    points.sort()
+    lowest_val = points[0]
+    highest_val = points[-1]
+    median_index = int(len(points) / 2)
+    median_val = points[median_index]
+
+    output_str = f"{alg1} - {alg2} - {category}\nMedian: {median_val}\nLowest: {lowest_val}\nHighest: {highest_val}"
+
+    output_latex_content(f"{output_name}.txt", output_str)
+
 
 
 os.chdir("../results")
@@ -622,16 +669,27 @@ if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
 # result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
 # result_data = prune_instances_not_on_all_algs(result_data, True)
 
-# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
+result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
 # latex_cactus_plot(result_data, "Memory", "cactus_memory_lambda_data")
 # latex_cactus_plot(result_data, "Time", "cactus_time_lambda_data")
 # latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_prune_parent", "Memory", "prune_parent_median_memory")
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_prune_parent", "Time", "prune_parent_median_time")
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_transformation_matrix", "Memory", "transformation_matrix_median_memory")
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_transformation_matrix", "Time", "transformation_matrix_median_time")
+calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "Memory", "reuse_waiting_median_memory")
+calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "Time", "reuse_waiting_median_time")
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Memory", "lambdadeduction_median_memory")
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Time", "lambdadeduction_median_time")
 
-result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
-latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
+# latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
 
 # result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "concretemcr"])
 # latex_cactus_plot(result_data, "Time", "cactus_time_data")
+# latex_cactus_plot(result_data, "Memory", "cactus_memory_data")
+# calc_median_values(result_data, "lambdadeduction", "concretemcr", "Memory", "concretemcr_median_memory")
+# calc_median_values(result_data, "lambdadeduction", "concretemcr", "Time", "concretemcr_median_time")
 # latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
 # latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
 

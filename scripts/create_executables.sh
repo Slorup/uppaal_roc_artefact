@@ -10,7 +10,7 @@ mkdir -p $EXECUTABLE_DIR
 declare -A algToGitCommit
 algToGitCommit["concretemcr"]="0c28d89"
 algToGitCommit["concretemcr_por"]="25f60b7"
-algToGitCommit["lambdadeduction"]="f906de1"
+algToGitCommit["lambdadeduction"]="341888d"
 algToGitCommit["bdd"]="529b66a"
 
 declare -a ALGS_TO_RUN=("concretemcr" "lambdadeduction" "concretemcr_por" "bdd")
