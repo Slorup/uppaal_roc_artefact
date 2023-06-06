@@ -54,6 +54,7 @@ reward'==0</label>
 		<transition>
 			<source ref="id1"/>
 			<target ref="id2"/>
+			<label kind="guard" x="68" y="-85">y &lt;=12</label>
 			<label kind="assignment" x="59" y="-93">x:=0</label>
 		</transition>
 		<transition>
