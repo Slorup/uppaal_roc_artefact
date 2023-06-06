@@ -20,7 +20,8 @@ alg_to_plot_options_dict: {str: str} = {
     "lambdadeduction_prune_parent": "color=gray, densely dotted, thick",
     "lambdadeduction_reuse_waiting": "color=green, dotted, thick",
     "lambdadeduction_transformation_matrix": "color=black, dash dot, thick",
-    "lambdadeduction_full_reset_cost": "color=magenta, thick"
+    "lambdadeduction_full_reset_cost": "color=magenta, thick",
+    "lambdadeduction_keep_parent": "color=magenta, thick"
 }
 
 alg_to_table_name: {str: str} = {
@@ -30,6 +31,7 @@ alg_to_table_name: {str: str} = {
     "lambdadeduction_reuse_waiting": "Symbolic $\lambda$\\nobreakdash-deduction - Reuse Waiting",
     "lambdadeduction_transformation_matrix": "Symbolic $\lambda$\\nobreakdash-deduction - Matrices",
     "lambdadeduction_full_reset_cost": "Symbolic $\lambda$\\nobreakdash-deduction - All opt. + cost reset",
+    "lambdadeduction_keep_parent": "Symbolic $\lambda$\\nobreakdash-deduction - All opt. + Keep parent",
     "concretemcr": "Concrete-MCR",
     "concretemcr_por": "Concrete-MCR + POR"
 }
@@ -381,6 +383,7 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_orde
         "lambdadeduction_prune_parent": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_transformation_matrix": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_full_reset_cost": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_keep_parent": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "concretemcr": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "concretemcr_por": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"]
     }
@@ -669,7 +672,7 @@ if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
 # result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
 # result_data = prune_instances_not_on_all_algs(result_data, True)
 
-result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
 # latex_cactus_plot(result_data, "Memory", "cactus_memory_lambda_data")
 # latex_cactus_plot(result_data, "Time", "cactus_time_lambda_data")
 # latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix"])
@@ -677,10 +680,13 @@ result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdade
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_prune_parent", "Time", "prune_parent_median_time")
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_transformation_matrix", "Memory", "transformation_matrix_median_memory")
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_transformation_matrix", "Time", "transformation_matrix_median_time")
-calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "Memory", "reuse_waiting_median_memory")
-calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "Time", "reuse_waiting_median_time")
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "Memory", "reuse_waiting_median_memory")
+# calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction_reuse_waiting", "Time", "reuse_waiting_median_time")
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Memory", "lambdadeduction_median_memory")
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Time", "lambdadeduction_median_time")
+
+result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
+latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
 
 # result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
 # latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
