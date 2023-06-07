@@ -190,10 +190,10 @@ def parse_result_data(result_folder, time_limit_seconds, memory_limit_mb):
                     if res:
                         mcr_reduction_time = res.group(1)
 
-                res = re.match(".*scaling(\d+)/", instance)
+                res = re.match(".*scaling(\d+)", instance)
                 scaling_factor = -1
                 if res:
-                    scaling_factor = res.group(1)
+                    scaling_factor = int(res.group(1))
                 finished = not out_of_time and not out_of_memory
                 res = InstanceResult(instance_name, ratios, int(optimal_ratio_time), int(total_time), int(scaling_factor), finished, out_of_memory, out_of_time, uses_cost_reward, int(mcr_states), int(howards_time), int(por_time), int(mcr_reduction_time), int(lp_total_count), int(memory_script), int(time_script), clean_waiting_list, no_transformation_matrix, int(number_of_mcr_location_vectors))
                 result_dict[alg_name].append(res)
@@ -224,53 +224,123 @@ def latex_ratio_step_plot(data: dict[str, list[InstanceResult]], instance_name):
 
     output_latex_content(f"{instance_name}_ratio_step_plot_data.txt", latex_plot_legend + latex_plot_data)
 
-def latex_constant_scaling_plot(data: dict[str, list[InstanceResult]], output_name):
-    latex_plot_legend = r"\legend{"
-    for alg in data.keys():
-        latex_plot_legend += f"{alg}, "
-    latex_plot_legend +="}\n"
+def latex_constant_scaling_plot(data: dict[str, list[InstanceResult]], output_name, alg_name):
+    instance_type_to_mark_options = {
+        "strandvejen": "mark=square, color=darkgray",
+        "surveil": "mark=o, color=gray",
+        "job": "mark=triangle, color=black"
+    }
 
-    latex_plot_data = ""
+    instance_type_to_points: dict[str, list[str]] = {}
+
+    data = prune_instances_not_on_all_algs(data, False)
+    sort_results_data(data)
+
+    instance_names: list[str] = []
     for (alg, instance_results) in data.items():
-        latex_plot_data += r"\addplot[mark=*, mark options={solid}, " +  f"{alg_to_plot_options_dict[alg]}] coordinates" + "{\n"
-        #Finds all instances that contains 'instance_name' in their name and has a scaling factor
-        scaling_instances = [instance_result for instance_result in instance_results if instance_result.scaling_factor != -1]
-        scaling_instances = sorted(scaling_instances, key=lambda x: x.scaling_factor)
-        for scaling_instance in scaling_instances:
-            #Still includes instances where they did not finish (time_to_finish = -1)
-            latex_plot_data += f"({scaling_instance.scaling_factor}, {scaling_instance.time_to_finish})\n"
-        latex_plot_data += r"};" + "\n"
-    output_latex_content(f"{output_name}.txt", latex_plot_legend + latex_plot_data)
+        instance_names = [instance_result.instance_name for instance_result in instance_results]
+        break
 
-def latex_state_scaling_plot(data: dict[str, list[InstanceResult]], output_name):
-    res_data = filter_to_specific_algs(data, ["concretemcr", "lambdadeduction"])
+    did_not_finish_value = 5000
+    min_value = 0.001
+    latex_legend_data = "\\legend{"
+    latex_plot_data = ""
+
+    for (alg, instance_results) in data.items():
+        if alg != alg_name:
+            continue
+        prev_name = ""
+        for instance_result in instance_results:
+            res = re.match(r"(.*)_scaling", instance_result.instance_name)
+            if not res:
+                continue
+
+            if res.group(1) != prev_name:
+                prev_name = res.group(1)
+                instances_of_this_type = [instance_result for instance_result in instance_results if prev_name in instance_result.instance_name]
+                instance_type_name = instance_result.instance_name.split("_")[0]
+                if instance_type_name == "job":
+                    latex_legend_data += f"Job,"
+                elif instance_type_name == "strandvejen":
+                    latex_legend_data += "Strandvejen,"
+                elif instance_type_name == "surveil":
+                    latex_legend_data += "Surveil,"
+                else:
+                    latex_legend_data += "Unknown,"
+                latex_plot_data += "\\addplot[" + instance_type_to_mark_options[instance_type_name] + ", thick] coordinates{ %" + prev_name + "\n"
+
+                for specific_instance in sorted(instances_of_this_type, key=lambda x: x.scaling_factor):
+                    res = re.match(r".*scaling(\d+)", specific_instance.instance_name)
+                    if not res:
+                        continue
+                    scaling = int(res.group(1))
+                    if specific_instance.finished:
+                        time = specific_instance.get_value("Time")
+                        latex_plot_data += f"({scaling}, {time if time > min_value else min_value})\n"
+                    else:
+                        latex_plot_data += f"({scaling}, {did_not_finish_value})\n"
+                latex_plot_data += "};\n"
+    latex_legend_data += "}"
+    output_latex_content(output_name + ".txt", latex_legend_data + "\n" + latex_plot_data)
+
+def latex_state_scaling_plot(data: dict[str, list[InstanceResult]]):
+    instance_type_to_mark_options = {
+        "strandvejen": "mark=square, color=darkgray",
+        "surveil": "mark=o, color=gray",
+        "job": "mark=triangle, color=black"
+    }
+
+    algs = ["concretemcr", "lambdadeduction_full_no_reuse_waiting"]
+    res_data = filter_to_specific_algs(data, algs)
     res_data = prune_instances_not_on_all_algs(res_data, False)
     sort_results_data(res_data)
     mcr_instances = res_data["concretemcr"]
-    lambda_instances = res_data["lambdadeduction"]
 
-    points = []
+    instance_name_to_average_discrete_states = {}
 
-    # latex_plot_data = "\legend{" + alg_to_table_name["concretemcr"] + ", " + alg_to_table_name["lambdadeduction"] + "}\n"
-    latex_plot_data = "\\addplot[mark=*, mark options={solid}, color=red, thick] coordinates {\n"
     for count in range(0, len(mcr_instances)):
         mcr_instance = mcr_instances[count]
-        lambda_instance = lambda_instances[count]
         mcr_states = mcr_instance.mcr_states
         mcr_num_loc_vectors = mcr_instance.number_of_mcr_location_vectors
-        if not mcr_instance.finished and not lambda_instance.finished:
+        if mcr_states == 0 or mcr_num_loc_vectors == -1:
             continue
-        elif not mcr_instance.finished:
-            points.append((mcr_states/mcr_num_loc_vectors, 10000))
-        elif not lambda_instance.finished:
-            points.append((mcr_states/mcr_num_loc_vectors, 0))
-        else:
-            points.append((mcr_states / mcr_num_loc_vectors, mcr_instance.time_to_finish / lambda_instance.time_to_finish))
-        count += 1
-    for (x_val, y_val) in sorted(points, key=lambda x: x[0]):
-        latex_plot_data += f"({x_val}, {y_val}) "
-    latex_plot_data += "\n};\n"
-    output_latex_content(f"{output_name}.txt", latex_plot_data)
+        instance_name_to_average_discrete_states[mcr_instance.instance_name] = int(mcr_states) / int(mcr_num_loc_vectors)
+
+    min_value = 0.001
+    did_not_finish_value = 5000
+    for (alg, instance_results) in res_data.items():
+        latex_legend_data = "\\legend{"
+        latex_plot_data = ""
+        prev_name = ""
+        for instance_result in sorted(instance_results, key=lambda x: x.instance_name):
+            res = re.match(r"(.*)_scaling", instance_result.instance_name)
+            if not res:
+                continue
+
+            if res.group(1) != prev_name:
+                prev_name = res.group(1)
+                instances_of_this_type = [instance_result for instance_result in instance_results if prev_name in instance_result.instance_name and instance_result.instance_name in instance_name_to_average_discrete_states.keys()]
+                instance_type_name = instance_result.instance_name.split("_")[0]
+                if instance_type_name == "job":
+                    latex_legend_data += f"Job,"
+                elif instance_type_name == "strandvejen":
+                    latex_legend_data += "Strandvejen,"
+                elif instance_type_name == "surveil":
+                    latex_legend_data += "Surveil,"
+                else:
+                    latex_legend_data += "Unknown,"
+                latex_plot_data += "\\addplot[" + instance_type_to_mark_options[instance_type_name] + ", thick] coordinates{ %" + prev_name + "\n"
+
+                for specific_instance in sorted(instances_of_this_type, key=lambda x: instance_name_to_average_discrete_states[x.instance_name]):
+                    average_discrete_states = instance_name_to_average_discrete_states[specific_instance.instance_name]
+                    if specific_instance.finished:
+                        time = specific_instance.get_value("Time")
+                        latex_plot_data += f"({average_discrete_states}, {time if time > min_value else min_value}) %{specific_instance.instance_name}\n"
+                    else:
+                        latex_plot_data += f"({average_discrete_states}, {did_not_finish_value}) %{specific_instance.instance_name}\n"
+                latex_plot_data += "};\n"
+        latex_legend_data += "}\n"
+        output_latex_content(f"scaling_discrete_states_{alg}.txt", latex_legend_data + latex_plot_data)
 
 def latex_cactus_plot(data: dict[str, list[InstanceResult]], category, output_name):
     data = prune_instances_not_on_all_algs(data, False)
@@ -667,7 +737,7 @@ if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
 
 # result_data = filter_instances_to_contain_str(result_data, "-")
-# result_data = filter_instances_to_contain_str(result_data, "scaling")
+result_data = filter_instances_to_contain_str(result_data, "scaling")
 # result_data = prune_instances_containing_str(result_data, "job")
 # result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
 # result_data = prune_instances_not_on_all_algs(result_data, True)
@@ -685,8 +755,8 @@ if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Memory", "lambdadeduction_median_memory")
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Time", "lambdadeduction_median_time")
 
-result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
-latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
+# latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
 
 # result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
 # latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
@@ -699,7 +769,8 @@ latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduc
 # latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
 # latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
 
-# latex_state_scaling_plot(result_data, "scaling_ratio_plot_data")
-# latex_constant_scaling_plot(result_data, "constant_scaling_plus1_plot_data")
+latex_state_scaling_plot(result_data)
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction_full_no_reuse_waiting"])
+# latex_constant_scaling_plot(result_data, "lambdadeduction_constant_scaling_plus1_plot_data", "lambdadeduction_full_no_reuse_waiting")
 
 #latex_ratio_step_plots_all_instances(result_data)

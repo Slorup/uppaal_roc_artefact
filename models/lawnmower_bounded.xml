@@ -8,13 +8,13 @@ clock x, y;</declaration>
 		<declaration>// Place local declarations here.</declaration>
 		<location id="id0" x="-161" y="-25">
 			<name x="-187" y="-59">Short</name>
-			<label kind="invariant" x="-289" y="-68">x&lt;= 3 &amp;&amp;
+			<label kind="invariant" x="-238" y="-119">x&lt;= 3 &amp;&amp;
 cost'==1 &amp;&amp;
 reward'==10</label>
 		</location>
 		<location id="id1" x="-17" y="-25">
 			<name x="-42" y="-59">Long</name>
-			<label kind="invariant" x="17" y="-59">x&lt;=5 &amp;&amp; 
+			<label kind="invariant" x="17" y="-59">x&lt;=5 &amp;&amp; y &lt;=8 &amp;&amp;
 cost'==1 &amp;&amp;
 reward'==3</label>
 		</location>
@@ -31,6 +31,13 @@ cost'==1 &amp;&amp;
 reward'==0</label>
 		</location>
 		<init ref="id0"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="assignment" x="-255" y="-34">y:=0</label>
+			<nail x="-212" y="0"/>
+			<nail x="-212" y="-51"/>
+		</transition>
 		<transition>
 			<source ref="id3"/>
 			<target ref="id0"/>
@@ -54,7 +61,6 @@ reward'==0</label>
 		<transition>
 			<source ref="id1"/>
 			<target ref="id2"/>
-			<label kind="guard" x="68" y="-85">y &lt;=12</label>
 			<label kind="assignment" x="59" y="-93">x:=0</label>
 		</transition>
 		<transition>

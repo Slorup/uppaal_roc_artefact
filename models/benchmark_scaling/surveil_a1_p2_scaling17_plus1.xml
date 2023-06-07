@@ -109,9 +109,9 @@ y &lt;= 10 * scaling + 1</label>
 	</template>
 	<system>// Place template instantiations here.
 // List one or more processes to be composed into a system.
-Agent1 = Agent(0, 1);
-Place1 = Place(0, 1);
-Place2 = Place(1, 1);
+Agent1 = Agent(0, 17);
+Place1 = Place(0, 17);
+Place2 = Place(1, 17);
 //Place3 = Place(2, 6);
 //Place4 = Place(3, 1);
 //Place5 = Place(4, 1);

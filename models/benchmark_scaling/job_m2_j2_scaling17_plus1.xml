@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+const int M = 2; // # Machines
+
+typedef int[0, M-1] mid_t;
+
+chan done[M];
+chan start[M];</declaration>
+	<template>
+		<name>Job</name>
+		<parameter>const int id, const mid_t m1, const int time1, const mid_t m2, const int time2, const int jobreward, const int deadline, const int scaling</parameter>
+		<declaration>clock x, y;</declaration>
+		<location id="id0" x="-705" y="-357">
+			<name x="-715" y="-391">Init</name>
+			<label kind="invariant" x="-935" y="-374">y &lt;= deadline * scaling + 1</label>
+		</location>
+		<location id="id1" x="-705" y="-246">
+			<name x="-807" y="-272">progress1</name>
+			<label kind="invariant" x="-926" y="-255">y &lt;= deadline * scaling + 1</label>
+		</location>
+		<location id="id2" x="-705" y="-153">
+			<name x="-782" y="-127">done1</name>
+			<label kind="invariant" x="-901" y="-144">y &lt;= deadline * scaling + 1</label>
+		</location>
+		<location id="id3" x="-595" y="-153">
+			<name x="-620" y="-204">progress2</name>
+			<label kind="invariant" x="-688" y="-187">y &lt;= deadline * scaling + 1</label>
+		</location>
+		<location id="id4" x="-493" y="-153">
+			<name x="-476" y="-187">done2</name>
+			<label kind="invariant" x="-476" y="-170">y &lt;= deadline * scaling + 1</label>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id0"/>
+			<label kind="guard" x="-569" y="-399">y &lt;= deadline * scaling + 1</label>
+			<label kind="assignment" x="-637" y="-382">x = 0, reward += jobreward * scaling + 1, y = 0</label>
+			<nail x="-493" y="-357"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+			<label kind="guard" x="-595" y="-136">x == time2 * scaling + 1</label>
+			<label kind="synchronisation" x="-595" y="-119">done[m2]!</label>
+			<label kind="assignment" x="-595" y="-102">x = 0</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="-688" y="-136">start[m2]!</label>
+			<label kind="assignment" x="-680" y="-119">x = 0</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-909" y="-221">x == time1 * scaling + 1</label>
+			<label kind="synchronisation" x="-807" y="-204">done[m1]!</label>
+			<label kind="assignment" x="-807" y="-187">x = 0</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-773" y="-331">start[m1]!</label>
+			<label kind="assignment" x="-756" y="-314">x = 0</label>
+		</transition>
+	</template>
+	<template>
+		<name x="5" y="5">Machine</name>
+		<parameter>const mid_t id, const int scaling</parameter>
+		<declaration>// Place local declarations here.
+</declaration>
+		<location id="id5" x="-416" y="-263">
+			<name x="-426" y="-297">Idle</name>
+			<label kind="invariant" x="-399" y="-289">cost' == 2 * scaling + 1</label>
+		</location>
+		<location id="id6" x="-416" y="-76">
+			<name x="-442" y="-59">InUse</name>
+			<label kind="invariant" x="-467" y="-34">cost' == 6 * scaling + 1</label>
+		</location>
+		<init ref="id5"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-544" y="-161">done[id]?</label>
+			<nail x="-476" y="-170"/>
+			<nail x="-476" y="-170"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-365" y="-136">start[id]?</label>
+			<nail x="-365" y="-170"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+
+// Job(JobID, Machine1, Time1, Machine2, Time2, Reward, Deadline, Scaling)
+// Machine(MachineID, Scaling)
+Machine1:=Machine(0, 17);
+Machine2:=Machine(1, 17);
+Job1:=Job(0, 0, 3, 1, 3, 1, 12, 17);
+Job2:=Job(1, 1, 3, 0, 3, 1, 12, 17);
+//Job3:=Job(2, 1, 3, 1, 3, 2, 15, 9);
+//Job4:=Job(3, 0, 3, 0, 3, 2, 15, 9);
+
+
+
+// List one or more processes to be composed into a system.
+system Machine1, Machine2, Job1, Job2;</system>
+	<queries>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>
