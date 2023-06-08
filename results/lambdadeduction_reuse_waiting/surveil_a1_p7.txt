@@ -1,0 +1,9 @@
+Algorithm: SymbolicLambdaDeduction
+Clean waiting list each iteration: 0
+No transformation matrix usage: 1
+No parent pointer pruning: 1
+Keep parent every iteration: 0
+Ratio type: Cost/Reward
+No solution found!
+Total time: 62241ms
+@@@62.60,688776@@@

@@ -1,0 +1,34 @@
+Algorithm: SymbolicLambdaDeduction
+Clean waiting list each iteration: 0
+No transformation matrix usage: 0
+No parent pointer pruning: 0
+Keep parent every iteration: 0
+Ratio type: Cost/Reward
+Found new better ratio: 1/1 [Time: 0ms]
+Found new better ratio: 1/3 [Time: 1ms]
+Found new better ratio: 1/4 [Time: 3ms]
+Found new better ratio: 5/21 [Time: 15ms]
+Found new better ratio: 4/17 [Time: 39ms]
+Found new better ratio: 11/47 [Time: 79ms]
+Found new better ratio: 7/30 [Time: 135ms]
+Found new better ratio: 17/73 [Time: 213ms]
+Found new better ratio: 10/43 [Time: 360ms]
+Found new better ratio: 23/99 [Time: 553ms]
+Found new better ratio: 49/211 [Time: 1112ms]
+Found new better ratio: 22067/99268 [Time: 1813ms]
+Found new better ratio: 899/8422 [Time: 1868ms]
+Found new better ratio: 1834/17201 [Time: 2000ms]
+Found new better ratio: 3677/34489 [Time: 2216ms]
+Found new better ratio: 1798/17141 [Time: 2274ms]
+Found new better ratio: 458/7051 [Time: 2361ms]
+Found new better ratio: 916/14543 [Time: 2457ms]
+Found new better ratio: 458/7345 [Time: 2645ms]
+Found new better ratio: 1832/29527 [Time: 2996ms]
+Found new better ratio: 2290/37019 [Time: 3847ms]
+Found new better ratio: 916/14837 [Time: 4654ms]
+Found new better ratio: 458/7429 [Time: 7639ms]
+Found new better ratio: 3664/59495 [Time: 14037ms]
+Found new better ratio: 229/3719 [Time: 73902ms]
+Ratio found: 0.0615757
+Total time: 96394ms
+@@@97.11,75964@@@

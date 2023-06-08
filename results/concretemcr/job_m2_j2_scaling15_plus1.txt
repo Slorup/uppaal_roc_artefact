@@ -1,0 +1,5 @@
+Algorithm: ConcreteMinimalCostRatio
+Starting reduction to MCR [Time: 0ms]
+Command terminated by signal 9
+@@@437.57,10426900@@@
+Out of memory

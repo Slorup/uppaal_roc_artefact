@@ -1,0 +1,13 @@
+Algorithm: ConcreteMinimalCostRatio
+Starting reduction to MCR [Time: 0ms]
+Reduction to MCR finished [Time: 10ms]
+MCR reduction time: 10ms
+Number of states: 1000
+Number of unique location vectors: 5
+Starting minimum cycle ratio solver [Time: 10ms]
+Found new better ratio: 3 [Time: 10]
+Found new better ratio: 0.75 [Time: 10]
+Minimum cycle ratio: 0.75
+Howard's - MCR solving time: 0ms
+Total time: 10ms
+@@@0.03,12052@@@

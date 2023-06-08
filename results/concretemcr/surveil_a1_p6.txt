@@ -1,0 +1,5 @@
+Algorithm: ConcreteMinimalCostRatio
+Starting reduction to MCR [Time: 0ms]
+Command exited with non-zero status 124
+@@@1800.36,5656140@@@
+Timed Out

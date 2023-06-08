@@ -1,0 +1,14 @@
+Algorithm: SymbolicLambdaDeduction
+Clean waiting list each iteration: 0
+No transformation matrix usage: 0
+No parent pointer pruning: 0
+Keep parent every iteration: 0
+Ratio type: Cost/Reward
+Found new better ratio: 3341/1492 [Time: 1ms]
+Found new better ratio: 29807/13484 [Time: 2ms]
+Found new better ratio: 15015/7516 [Time: 3ms]
+Found new better ratio: 3741/1879 [Time: 6ms]
+Found new better ratio: 10457/5968 [Time: 7ms]
+Ratio found: 1.75218
+Total time: 13ms
+@@@0.07,12624@@@
