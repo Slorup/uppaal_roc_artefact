@@ -1,0 +1,4 @@
+lambdadeduction_no_optimisations - lambdadeduction - Time
+Median: -0.3824461438496526
+Lowest: -0.8639313063112182
+Highest: 2.8588428126536636

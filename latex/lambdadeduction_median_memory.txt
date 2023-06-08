@@ -1,0 +1,4 @@
+lambdadeduction_no_optimisations - lambdadeduction - Memory
+Median: -0.06472957422324513
+Lowest: -0.7010400320205338
+Highest: 0.65

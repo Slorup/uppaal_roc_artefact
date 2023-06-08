@@ -1,0 +1,4 @@
+lambdadeduction_no_optimisations - lambdadeduction_transformation_matrix - Memory
+Median: -0.016513178786916497
+Lowest: -0.06789413118527036
+Highest: 0.0065520065520065585

@@ -1,0 +1,4 @@
+lambdadeduction_no_optimisations - lambdadeduction_reuse_waiting - Time
+Median: 0.0
+Lowest: -0.6722689075630252
+Highest: 3.3333333333333326

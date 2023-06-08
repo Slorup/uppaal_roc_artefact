@@ -1,0 +1,50 @@
+\legend{Job,Strandvejen,Surveil,}
+\addplot[mark=triangle, color=blue, thick] coordinates{ %job_m2_j2
+(1073.304347826087, 0.351) %job_m2_j2_scaling1_plus1
+(8954.173913043478, 4.398) %job_m2_j2_scaling2_plus1
+(34335.391304347824, 20.253) %job_m2_j2_scaling3_plus1
+(92912.0, 62.034) %job_m2_j2_scaling4_plus1
+(205382.4347826087, 158.156) %job_m2_j2_scaling5_plus1
+(397446.0, 360.93) %job_m2_j2_scaling6_plus1
+};
+\addplot[mark=square, color=red, thick] coordinates{ %strandvejen_f1_v1_c2
+(84.11333333333333, 0.577) %strandvejen_f1_v1_c2_scaling1_plus1
+(266.50666666666666, 3.27) %strandvejen_f1_v1_c2_scaling2_plus1
+(551.1666666666666, 6.576) %strandvejen_f1_v1_c2_scaling3_plus1
+(938.0933333333334, 10.998) %strandvejen_f1_v1_c2_scaling4_plus1
+(1427.2866666666666, 15.493) %strandvejen_f1_v1_c2_scaling5_plus1
+(2018.7466666666667, 20.58) %strandvejen_f1_v1_c2_scaling6_plus1
+(2712.4733333333334, 29.637) %strandvejen_f1_v1_c2_scaling7_plus1
+(3508.4666666666667, 37.172) %strandvejen_f1_v1_c2_scaling8_plus1
+(4406.7266666666665, 50.738) %strandvejen_f1_v1_c2_scaling9_plus1
+(5407.253333333333, 56.859) %strandvejen_f1_v1_c2_scaling10_plus1
+(6510.046666666667, 74.916) %strandvejen_f1_v1_c2_scaling11_plus1
+(7715.106666666667, 82.694) %strandvejen_f1_v1_c2_scaling12_plus1
+(9022.433333333332, 97.309) %strandvejen_f1_v1_c2_scaling13_plus1
+(10432.026666666667, 110.465) %strandvejen_f1_v1_c2_scaling14_plus1
+(11943.886666666667, 132.597) %strandvejen_f1_v1_c2_scaling15_plus1
+(13558.013333333334, 149.098) %strandvejen_f1_v1_c2_scaling16_plus1
+(15274.406666666666, 170.715) %strandvejen_f1_v1_c2_scaling17_plus1
+(17093.066666666666, 185.619) %strandvejen_f1_v1_c2_scaling18_plus1
+(19013.993333333332, 234.09) %strandvejen_f1_v1_c2_scaling19_plus1
+(21037.18666666667, 229.98) %strandvejen_f1_v1_c2_scaling20_plus1
+};
+\addplot[mark=o, color=dgreen, thick] coordinates{ %surveil_a1_p2
+(324.9230769230769, 0.049) %surveil_a1_p2_scaling1_plus1
+(1729.5384615384614, 0.335) %surveil_a1_p2_scaling2_plus1
+(5026.461538461538, 1.051) %surveil_a1_p2_scaling3_plus1
+(11023.384615384615, 2.567) %surveil_a1_p2_scaling4_plus1
+(20528.0, 5.955) %surveil_a1_p2_scaling5_plus1
+(34348.0, 11.426) %surveil_a1_p2_scaling6_plus1
+(53291.07692307692, 18.983) %surveil_a1_p2_scaling7_plus1
+(78164.92307692308, 32.229) %surveil_a1_p2_scaling8_plus1
+(109777.23076923077, 65.812) %surveil_a1_p2_scaling9_plus1
+(148935.6923076923, 96.077) %surveil_a1_p2_scaling10_plus1
+(196448.0, 143.6) %surveil_a1_p2_scaling11_plus1
+(253121.84615384616, 205.382) %surveil_a1_p2_scaling12_plus1
+(319764.92307692306, 339.06) %surveil_a1_p2_scaling13_plus1
+(397184.92307692306, 401.176) %surveil_a1_p2_scaling14_plus1
+(486189.53846153844, 561.738) %surveil_a1_p2_scaling15_plus1
+(587586.4615384615, 715.171) %surveil_a1_p2_scaling16_plus1
+(702183.3846153846, 947.941) %surveil_a1_p2_scaling17_plus1
+};

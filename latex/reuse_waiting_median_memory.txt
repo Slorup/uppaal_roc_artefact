@@ -1,0 +1,4 @@
+lambdadeduction_no_optimisations - lambdadeduction_reuse_waiting - Memory
+Median: -0.014459415050936588
+Lowest: -0.5497811294862102
+Highest: 0.715409309791332

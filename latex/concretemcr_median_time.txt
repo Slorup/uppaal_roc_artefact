@@ -1,0 +1,4 @@
+lambdadeduction_full_no_reuse_waiting - concretemcr - Time
+Median: 3.169014084507042
+Lowest: -10000
+Highest: 10000

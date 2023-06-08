@@ -1,0 +1,4 @@
+lambdadeduction_no_optimisations - lambdadeduction_prune_parent - Time
+Median: -0.0324675324675325
+Lowest: -0.27821223520095034
+Highest: 0.23273242514254489

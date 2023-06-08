@@ -1,0 +1,4 @@
+lambdadeduction_no_optimisations - lambdadeduction_prune_parent - Memory
+Median: -0.020545746388443035
+Lowest: -0.42081241442263806
+Highest: 0.014905149051490558
