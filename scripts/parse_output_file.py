@@ -21,19 +21,21 @@ alg_to_plot_options_dict: {str: str} = {
     "lambdadeduction_reuse_waiting": "color=green, dotted, thick",
     "lambdadeduction_transformation_matrix": "color=black, dash dot, thick",
     "lambdadeduction_full_reset_cost": "color=magenta, thick",
-    "lambdadeduction_keep_parent": "color=magenta, thick"
+    "lambdadeduction_keep_parent": "color=magenta, thick",
+    "lambdadeduction_full_no_reuse_waiting": "color=magenta, thick"
 }
 
 alg_to_table_name: {str: str} = {
-    "lambdadeduction": "Symbolic $\lambda$\\nobreakdash-deduction - All opt.",
-    "lambdadeduction_no_optimisations": "Symbolic $\lambda$\\nobreakdash-deduction - No opt.",
-    "lambdadeduction_prune_parent": "Symbolic $\lambda$\\nobreakdash-deduction - Parent Pruning",
-    "lambdadeduction_reuse_waiting": "Symbolic $\lambda$\\nobreakdash-deduction - Reuse Waiting",
-    "lambdadeduction_transformation_matrix": "Symbolic $\lambda$\\nobreakdash-deduction - Matrices",
-    "lambdadeduction_full_reset_cost": "Symbolic $\lambda$\\nobreakdash-deduction - All opt. + cost reset",
-    "lambdadeduction_keep_parent": "Symbolic $\lambda$\\nobreakdash-deduction - All opt. + Keep parent",
-    "concretemcr": "Concrete-MCR",
-    "concretemcr_por": "Concrete-MCR + POR"
+    "lambdadeduction": "S-$\lambda$D - All opt.",
+    "lambdadeduction_no_optimisations": "S-$\lambda$D - No opt.",
+    "lambdadeduction_prune_parent": "S-$\lambda$D - Parent Pruning",
+    "lambdadeduction_reuse_waiting": "S-$\lambda$D - Reuse Waiting",
+    "lambdadeduction_transformation_matrix": "S-$\lambda$D - Matrices",
+    # "lambdadeduction_full_reset_cost": "Symbolic $\lambda$\\nobreakdash-deduction - All opt. + cost reset",
+    # "lambdadeduction_keep_parent": "Symbolic $\lambda$\\nobreakdash-deduction - All opt. + Keep parent",
+    "lambdadeduction_full_no_reuse_waiting": "S-$\lambda$D - Matrices + Parent Pruning",
+    "concretemcr": "CP-MCR",
+    "concretemcr_por": "CP-MCR + POR"
 }
 
 class InstanceResult:
@@ -201,10 +203,33 @@ def parse_result_data(result_folder, time_limit_seconds, memory_limit_mb):
     return result_dict
 
 
-def latex_ratio_step_plots_all_instances(data: dict[str, list[InstanceResult]]):
-    alg, instance_results = list(data.items())[0]
+def latex_ratio_step_plots_all_instances(data: dict[str, list[InstanceResult]], alg):
+    instance_results = data[alg]
+    latex_plot_data = ""
+    did_not_finish_value = 1800
     for instance in instance_results:
-        latex_ratio_step_plot(data, instance.instance_name)
+        latex_plot_data += r"\addplot" + "[const plot, mark=square] coordinates{ %" + instance.instance_name + "\n"
+        last_ratio = 10000
+        last_time = 0
+        for ratio,time,lp_count in instance.ratios:
+            latex_plot_data += f"({time / 1000}, {ratio})\n"
+            last_ratio = ratio
+            last_time = time / 1000
+        latex_plot_data += "};\n"
+        if instance.finished:
+            latex_plot_data += r"\addplot" + "[const plot, mark=square*] coordinates{ %" + instance.instance_name + " last point\n"
+            latex_plot_data += f"({instance.time_to_finish / 1000}, {last_ratio}) %Finish time\n"
+            latex_plot_data += "};\n"
+            latex_plot_data += r"\addplot" + "[const plot] coordinates{ %" + instance.instance_name + " last line\n"
+            latex_plot_data += f"({last_time}, {last_ratio}) %Latest ratio point\n"
+            latex_plot_data += f"({instance.time_to_finish / 1000}, {last_ratio}) %Finish time\n"
+            latex_plot_data += "};\n"
+        else:
+            latex_plot_data += r"\addplot" + "[const plot] coordinates{ %" + instance.instance_name + " last line\n"
+            latex_plot_data += f"({last_time}, {last_ratio}) %Latest ratio point\n"
+            latex_plot_data += f"({did_not_finish_value}, {last_ratio}) %Did not finish\n"
+            latex_plot_data += "};\n"
+    output_latex_content("strandvejen_step_plot.txt", latex_plot_data)
 
 def latex_ratio_step_plot(data: dict[str, list[InstanceResult]], instance_name):
     latex_plot_legend = r"\legend{"
@@ -226,9 +251,9 @@ def latex_ratio_step_plot(data: dict[str, list[InstanceResult]], instance_name):
 
 def latex_constant_scaling_plot(data: dict[str, list[InstanceResult]], output_name, alg_name):
     instance_type_to_mark_options = {
-        "strandvejen": "mark=square, color=darkgray",
-        "surveil": "mark=o, color=gray",
-        "job": "mark=triangle, color=black"
+        "strandvejen": "mark=square, color=red",
+        "surveil": "mark=o, color=dgreen",
+        "job": "mark=triangle, color=blue"
     }
 
     instance_type_to_points: dict[str, list[str]] = {}
@@ -285,9 +310,9 @@ def latex_constant_scaling_plot(data: dict[str, list[InstanceResult]], output_na
 
 def latex_state_scaling_plot(data: dict[str, list[InstanceResult]]):
     instance_type_to_mark_options = {
-        "strandvejen": "mark=square, color=darkgray",
-        "surveil": "mark=o, color=gray",
-        "job": "mark=triangle, color=black"
+        "strandvejen": "mark=square, color=red",
+        "surveil": "mark=o, color=dgreen",
+        "job": "mark=triangle, color=blue"
     }
 
     algs = ["concretemcr", "lambdadeduction_full_no_reuse_waiting"]
@@ -337,7 +362,8 @@ def latex_state_scaling_plot(data: dict[str, list[InstanceResult]]):
                         time = specific_instance.get_value("Time")
                         latex_plot_data += f"({average_discrete_states}, {time if time > min_value else min_value}) %{specific_instance.instance_name}\n"
                     else:
-                        latex_plot_data += f"({average_discrete_states}, {did_not_finish_value}) %{specific_instance.instance_name}\n"
+                        latex_plot_data += "" #Don't plot if not finish
+                        # latex_plot_data += f"({average_discrete_states}, {did_not_finish_value}) %{specific_instance.instance_name}\n"
                 latex_plot_data += "};\n"
         latex_legend_data += "}\n"
         output_latex_content(f"scaling_discrete_states_{alg}.txt", latex_legend_data + latex_plot_data)
@@ -448,6 +474,7 @@ def latex_data_structure_size_plot(result_file):
 def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_order):
     alg_to_table_columns: {str: list[str]} = {
         "lambdadeduction": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
+        "lambdadeduction_full_no_reuse_waiting": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_no_optimisations": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_reuse_waiting": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
         "lambdadeduction_prune_parent": ["TotalTime", "Memory", "BestRatio", "BestRatioTime"],
@@ -604,12 +631,12 @@ def latex_big_table(data: dict[str, list[InstanceResult]], output_name, alg_orde
     latex_table += "\\end{tabular}"
     output_latex_content(f"{output_name}.txt", latex_table)
 
-def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_name, category_name, output_name):
+def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_name, category_name, output_name, did_not_finish_value):
     instance_type_to_mark_options = {
         "general": "mark=+, color=black",
-        "strandvejen": "mark=square, color=black",
-        "surveil": "mark=o, color=black",
-        "job": "mark=triangle, color=black"
+        "strandvejen": "mark=square, color=red",
+        "surveil": "mark=o, color=dgreen",
+        "job": "mark=triangle, color=blue"
     }
 
     instance_type_to_points: dict[str, list[str]] = {}
@@ -622,7 +649,6 @@ def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_
         instance_names = [instance_result.instance_name for instance_result in instance_results]
         break
 
-    did_not_finish_value = 5000
     min_value = 0.001
     for instance_name in instance_names:
         x_alg_value = -1
@@ -630,16 +656,16 @@ def latex_scatter_plot(data: dict[str, list[InstanceResult]], x_alg_name, y_alg_
         for (alg, instance_results) in data.items():
             instance_result: InstanceResult = [instance_result for instance_result in instance_results if instance_result.instance_name == instance_name][0]
             if alg == x_alg_name:
-                val = instance_result.get_value(category_name)
-                if val == -1:
+                if not instance_result.finished:
                     x_alg_value = did_not_finish_value
                 else:
+                    val = instance_result.get_value(category_name)
                     x_alg_value = val if val >= min_value else min_value
             elif alg == y_alg_name:
-                val = instance_result.get_value(category_name)
-                if val == -1:
+                if not instance_result.finished:
                     y_alg_value = did_not_finish_value
                 else:
+                    val = instance_result.get_value(category_name)
                     y_alg_value = val if val >= min_value else min_value
             else:
                 continue
@@ -737,8 +763,8 @@ if not os.path.exists(latex_dir) or not os.path.isdir(latex_dir):
     os.mkdir(latex_dir)
 
 # result_data = filter_instances_to_contain_str(result_data, "-")
-result_data = filter_instances_to_contain_str(result_data, "scaling")
-# result_data = prune_instances_containing_str(result_data, "job")
+# result_data = filter_instances_to_contain_str(result_data, "scaling")
+result_data = prune_instances_containing_str(result_data, ["scaling"])
 # result_data = prune_instances_containing_str(result_data, ["a2_p5", "a2_p6", "a2_p7", "a3_p4", "a3_p5", "a3_p6", "a3_p7"])
 # result_data = prune_instances_not_on_all_algs(result_data, True)
 
@@ -755,21 +781,27 @@ result_data = filter_instances_to_contain_str(result_data, "scaling")
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Memory", "lambdadeduction_median_memory")
 # calc_median_values(result_data, "lambdadeduction_no_optimisations", "lambdadeduction", "Time", "lambdadeduction_median_time")
 
-# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
-# latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_keep_parent", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_full_no_reuse_waiting", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
+# latex_big_table(result_data, "test_table_data", ["lambdadeduction", "lambdadeduction_full_no_reuse_waiting", "lambdadeduction_reuse_waiting", "lambdadeduction_prune_parent", "lambdadeduction_transformation_matrix", "lambdadeduction_no_optimisations", "concretemcr"])
 
 # result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "lambdadeduction_no_optimisations"])
 # latex_big_table(result_data, "big_table_lambda_data", ["lambdadeduction", "lambdadeduction_no_optimisations"])
 
-# result_data = filter_to_specific_algs(result_data, ["lambdadeduction", "concretemcr"])
+result_data = filter_to_specific_algs(result_data, ["lambdadeduction_full_no_reuse_waiting", "concretemcr"])
 # latex_cactus_plot(result_data, "Time", "cactus_time_data")
 # latex_cactus_plot(result_data, "Memory", "cactus_memory_data")
-# calc_median_values(result_data, "lambdadeduction", "concretemcr", "Memory", "concretemcr_median_memory")
-# calc_median_values(result_data, "lambdadeduction", "concretemcr", "Time", "concretemcr_median_time")
-# latex_scatter_plot(result_data, "lambdadeduction", "concretemcr", "Time", "scatter_plot_time_data")
-# latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction"])
+calc_median_values(result_data, "lambdadeduction_full_no_reuse_waiting", "concretemcr", "Memory", "concretemcr_median_memory")
+calc_median_values(result_data, "lambdadeduction_full_no_reuse_waiting", "concretemcr", "Time", "concretemcr_median_time")
+# latex_scatter_plot(result_data, "lambdadeduction_full_no_reuse_waiting", "concretemcr", "Time", "scatter_plot_time_data", 5000)
+# latex_scatter_plot(result_data, "lambdadeduction_full_no_reuse_waiting", "concretemcr", "Memory", "scatter_plot_memory_data", 50000)
+# latex_big_table(result_data, "big_table_data", ["concretemcr", "lambdadeduction_full_no_reuse_waiting"])
 
-latex_state_scaling_plot(result_data)
+# result_data = filter_to_specific_algs(result_data, ["lambdadeduction_full_no_reuse_waiting"])
+# result_data = prune_instances_containing_str(result_data, ["scaling"])
+# result_data = filter_instances_to_contain_str(result_data, "strandvejen")
+# latex_ratio_step_plots_all_instances(result_data, "lambdadeduction_full_no_reuse_waiting")
+
+# latex_state_scaling_plot(result_data)
 # result_data = filter_to_specific_algs(result_data, ["lambdadeduction_full_no_reuse_waiting"])
 # latex_constant_scaling_plot(result_data, "lambdadeduction_constant_scaling_plus1_plot_data", "lambdadeduction_full_no_reuse_waiting")
 
